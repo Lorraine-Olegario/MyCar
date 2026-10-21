@@ -26,8 +26,7 @@ Route::resource('recurring', RecurringExpenseController::class)
     ->parameters(['recurring' => 'recurring']);
 Route::post('recurring/occurrences/{occurrence}/pay', [RecurringExpenseController::class, 'pay'])->name('recurring.occurrences.pay');
 Route::patch('recurring/occurrences/{occurrence}/cancel', [RecurringExpenseController::class, 'cancel'])->name('recurring.occurrences.cancel');
-Route::get('/fuelings', fn () => Inertia::render('Fuelings/Index'))->name('fuelings.index');
-Route::resource('fuelings', FuelingController::class)->only(['store', 'update', 'destroy']);
+Route::resource('fuelings', FuelingController::class)->only(['index', 'store', 'update', 'destroy']);
 Route::get('/reports', fn () => Inertia::render('Reports/Index'))->name('reports.index');
 Route::resource('categories', ExpenseCategoryController::class)
     ->only(['index', 'store', 'update', 'destroy']);
