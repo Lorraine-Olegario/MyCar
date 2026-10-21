@@ -9,6 +9,7 @@ use App\Http\Controllers\RecurringExpenseController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReportExportController;
 use App\Http\Controllers\VehicleController;
+use App\Http\Controllers\VehicleFipeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -18,6 +19,13 @@ Route::resource('vehicles', VehicleController::class);
 Route::get('vehicles/{vehicle}/photo', [VehicleController::class, 'photo'])
     ->name('vehicles.photo')
     ->withTrashed();
+Route::prefix('vehicles/{vehicle}/fipe')->name('vehicles.fipe.')->group(function () {
+    Route::get('brands', [VehicleFipeController::class, 'brands'])->name('brands');
+    Route::get('models', [VehicleFipeController::class, 'models'])->name('models');
+    Route::get('years', [VehicleFipeController::class, 'years'])->name('years');
+    Route::post('/', [VehicleFipeController::class, 'store'])->name('store');
+    Route::post('refresh', [VehicleFipeController::class, 'refresh'])->name('refresh');
+});
 Route::patch('vehicles/{vehicle}/restore', [VehicleController::class, 'restore'])
     ->name('vehicles.restore')
     ->withTrashed();

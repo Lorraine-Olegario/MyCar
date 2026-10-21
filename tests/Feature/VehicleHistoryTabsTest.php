@@ -205,9 +205,9 @@ class VehicleHistoryTabsTest extends TestCase
         $this->assertNotNull($maintenance);
     }
 
-    public function test_fipe_tab_is_a_placeholder_and_invalid_tabs_fall_back(): void
+    public function test_invalid_tabs_fall_back_to_expenses(): void
     {
-        $this->show('tab=fipe')->assertInertia(fn (Assert $page) => $page->where('history.tab', 'fipe')->where('history.data', null));
+        $this->show('tab=fipe')->assertInertia(fn (Assert $page) => $page->where('history.tab', 'expenses'));
         $this->show('tab=hack')->assertInertia(fn (Assert $page) => $page->where('history.tab', 'expenses'));
     }
 

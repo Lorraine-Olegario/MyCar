@@ -22,7 +22,6 @@ const tabs = [
     { id: 'maintenances', label: 'Manutenções' },
     { id: 'recurring', label: 'Recorrências' },
     { id: 'dues', label: 'Documentos e vencimentos' },
-    { id: 'fipe', label: 'FIPE' },
 ];
 
 const filterTabs = ['expenses', 'fuelings', 'maintenances'];
@@ -310,11 +309,6 @@ const createLink = computed(
                     </ul>
                     <BasePagination :links="data.items.links ?? []" label="Paginação de vencimentos" />
                 </template>
-
-                <!-- FIPE -->
-                <p v-else class="text-sm leading-relaxed text-slate-400">
-                    A consulta e o histórico de valores FIPE entram na Fase 5. O valor FIPE é uma referência de mercado e nunca será somado aos gastos.
-                </p>
             </div>
         </div>
     </section>

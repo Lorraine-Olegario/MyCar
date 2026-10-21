@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Fipe\FipeQuoteService;
+use App\Domain\Fipe\FipeVehicleType;
 use App\Domain\Reporting\Period;
 use App\Domain\Reporting\VehicleFinancialOverview;
 use App\Domain\Reporting\VehicleHistory;
@@ -79,7 +81,7 @@ class VehicleController extends Controller
     /**
      * Exibe um veículo.
      */
-    public function show(Request $request, Vehicle $vehicle, VehicleFinancialOverview $financial, VehicleHistory $history): Response
+    public function show(Request $request, Vehicle $vehicle, VehicleFinancialOverview $financial, VehicleHistory $history, FipeQuoteService $fipe): Response
     {
         // `financial` e `history` são calculados só quando pedidos (cargas parciais ao trocar de aba).
         return Inertia::render('Vehicles/Show', [
@@ -90,8 +92,38 @@ class VehicleController extends Controller
                 $request->query(),
                 $this->selectedPeriod($financial->build($vehicle, $request->query())['selection']),
             ),
+            'fipe' => fn () => $this->fipeProps($vehicle, $fipe),
             'options' => $this->options(),
         ]);
+    }
+
+    /**
+     * Dados da seção FIPE: cotação atual (com aviso de desatualização), histórico e a seleção guardada.
+     *
+     * @return array<string, mixed>
+     */
+    private function fipeProps(Vehicle $vehicle, FipeQuoteService $fipe): array
+    {
+        $stored = $fipe->storedSelection($vehicle);
+        $type = $stored?->type ?? FipeVehicleType::forCategory($vehicle->category);
+
+        return [
+            'snapshot' => $fipe->snapshot($vehicle),
+            'quotes' => $vehicle->fipeQuotes()->limit(60)->get()->map(fn ($quote) => [
+                'id' => $quote->id,
+                'value_cents' => $quote->value_cents,
+                'reference_month' => $quote->reference_month,
+                'consulted_at' => $quote->consulted_at->toIso8601String(),
+                'brand' => $quote->brand,
+                'model' => $quote->model,
+                'model_year' => $quote->model_year,
+                'fipe_code' => $quote->fipe_code,
+            ])->values()->all(),
+            'selection' => $stored ? ['type' => $stored->type->value, 'brand_id' => $stored->brandId, 'model_id' => $stored->modelId, 'year_id' => $stored->yearId] : null,
+            'vehicle_type' => $type?->value,
+            'needs_type' => $type === null,
+            'types' => array_map(fn (FipeVehicleType $case) => ['value' => $case->value, 'label' => $case->label()], FipeVehicleType::cases()),
+        ];
     }
 
     /**
