@@ -148,6 +148,13 @@ const confirmArchive = () => {
                     Voltar para veículos
                 </Link>
 
+                <Link
+                    :href="`/vehicles/${vehicle.id}/edit`"
+                    class="inline-flex items-center justify-center rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+                >
+                    Editar
+                </Link>
+
                 <BaseButton variant="ghost" @click="confirmingArchive = true">
                     Arquivar
                 </BaseButton>

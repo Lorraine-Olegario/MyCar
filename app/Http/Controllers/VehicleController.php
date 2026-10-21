@@ -98,6 +98,28 @@ class VehicleController extends Controller
     }
 
     /**
+     * Formulário de cadastro.
+     */
+    public function create(): Response
+    {
+        return Inertia::render('Vehicles/Form', [
+            'vehicle' => null,
+            'options' => $this->options(),
+        ]);
+    }
+
+    /**
+     * Formulário de edição.
+     */
+    public function edit(Vehicle $vehicle): Response
+    {
+        return Inertia::render('Vehicles/Form', [
+            'vehicle' => $vehicle,
+            'options' => $this->options(),
+        ]);
+    }
+
+    /**
      * Cadastra um veículo.
      */
     public function store(StoreVehicleRequest $request, VehiclePhotoStorage $photos): RedirectResponse
