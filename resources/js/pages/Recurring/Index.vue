@@ -33,7 +33,7 @@ const canceling = ref(null);
 const canceled = ref(false);
 
 const statusStyle = {
-    forecast: 'bg-amber-500/15 text-amber-600',
+    forecast: 'bg-amber-500/15 text-amber-700',
     paid: 'bg-emerald-500/15 text-emerald-300',
     canceled: 'bg-slate-800 text-slate-400 line-through',
 };
@@ -169,7 +169,7 @@ const confirmCancel = () => {
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900 p-5">
                 <dt class="text-sm text-slate-300">Previsto para vencer no mês</dt>
-                <dd class="mt-2 font-mono text-2xl font-bold text-amber-600">{{ formatCurrency(summary.forecast_cents) }}</dd>
+                <dd class="mt-2 font-mono text-2xl font-bold text-amber-700">{{ formatCurrency(summary.forecast_cents) }}</dd>
                 <p class="mt-1 text-xs text-slate-500">Previsão em aberto; não conta como gasto.</p>
             </div>
         </dl>

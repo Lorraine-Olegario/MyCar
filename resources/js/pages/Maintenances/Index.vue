@@ -37,7 +37,7 @@ const categoryOptions = computed(() =>
 
 const dueStyle = {
     overdue: 'bg-rose-500/15 text-rose-300',
-    due_soon: 'bg-amber-500/15 text-amber-600',
+    due_soon: 'bg-amber-500/15 text-amber-700',
     ok: 'bg-emerald-500/15 text-emerald-300',
 };
 

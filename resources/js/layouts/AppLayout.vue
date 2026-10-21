@@ -112,7 +112,7 @@ watch(currentPath, () => {
                     </ul>
                 </nav>
 
-                <p class="px-5 py-5 text-xs leading-relaxed text-slate-500">
+                <p class="px-5 py-5 text-xs leading-relaxed text-slate-600">
                     Versão inicial<br />
                     Dados salvos localmente
                 </p>
