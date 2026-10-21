@@ -7,6 +7,7 @@ use App\Http\Controllers\FuelingController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\RecurringExpenseController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReportExportController;
 use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -32,6 +33,7 @@ Route::resource('maintenances', MaintenanceController::class)->only(['index', 's
 Route::resource('fuelings', FuelingController::class)->only(['index', 'store', 'update', 'destroy']);
 Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 Route::get('/reports/{report}', [ReportController::class, 'show'])->name('reports.show');
+Route::get('/reports/{report}/csv', ReportExportController::class)->name('reports.csv');
 Route::resource('categories', ExpenseCategoryController::class)
     ->only(['index', 'store', 'update', 'destroy']);
 Route::patch('categories/{category}/toggle', [ExpenseCategoryController::class, 'toggle'])->name('categories.toggle');
