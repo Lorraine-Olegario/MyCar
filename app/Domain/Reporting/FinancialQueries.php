@@ -217,6 +217,65 @@ class FinancialQueries
         ])->all();
     }
 
+    /**
+     * Despesas por veículo em cada mês ('Y-m') ou ano ('Y') do período, com meses vazios
+     * preenchidos. Usada pelos relatórios de gastos mensais e anuais por veículo.
+     *
+     * @return array{vehicles: array<int, string>, buckets: list<string>, cells: array<string, array<int, int>>}
+     */
+    public function seriesByVehicle(ReportFilters $filters, string $format): array
+    {
+        $rows = $this->expenses($filters)
+            ->selectRaw('vehicles.id as vehicle_id, vehicles.name, expenses.occurred_on as day, sum(expenses.amount_cents) as total')
+            ->groupBy('vehicles.id', 'vehicles.name', 'expenses.occurred_on')
+            ->get();
+
+        $vehicles = [];
+        $cells = [];
+
+        foreach ($rows as $row) {
+            $key = CarbonImmutable::parse($row->day)->format($format);
+            $vehicles[(int) $row->vehicle_id] = $row->name;
+            $cells[$key][(int) $row->vehicle_id] = ($cells[$key][(int) $row->vehicle_id] ?? 0) + (int) $row->total;
+        }
+
+        asort($vehicles);
+
+        return [
+            'vehicles' => $vehicles,
+            'buckets' => $this->bucketKeys($filters->period, $format, array_keys($cells)),
+            'cells' => $cells,
+        ];
+    }
+
+    /**
+     * Lista completa de despesas do filtro (mais recentes primeiro), já com nomes de veículo e categoria.
+     *
+     * @return list<array{id: int, occurred_on: string, vehicle: string, category: string, description: string, vendor: ?string, payment_method: ?string, amount_cents: int}>
+     */
+    public function expenseRows(ReportFilters $filters): array
+    {
+        return $this->expenses($filters)
+            ->join('expense_categories', 'expense_categories.id', '=', 'expenses.expense_category_id')
+            ->orderByDesc('expenses.occurred_on')
+            ->orderByDesc('expenses.id')
+            ->get([
+                'expenses.id', 'expenses.occurred_on', 'vehicles.name as vehicle', 'expense_categories.name as category',
+                'expenses.description', 'expenses.vendor', 'expenses.payment_method', 'expenses.amount_cents',
+            ])
+            ->map(fn ($row) => [
+                'id' => (int) $row->id,
+                'occurred_on' => CarbonImmutable::parse($row->occurred_on)->toDateString(),
+                'vehicle' => $row->vehicle,
+                'category' => $row->category,
+                'description' => $row->description,
+                'vendor' => $row->vendor,
+                'payment_method' => $row->payment_method,
+                'amount_cents' => (int) $row->amount_cents,
+            ])
+            ->all();
+    }
+
     // ----------------------------------------------------- previsto vs pago
 
     /**
