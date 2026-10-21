@@ -143,3 +143,12 @@ páginas; o `app.js` resolve as páginas em `resources/js/pages` e aplica o
 
 `.env`, `database/*.sqlite*`, `node_modules`, `public/build`, `public/hot` e
 `vendor` estão no `.gitignore`. Nenhuma credencial é versionada.
+
+## Docker
+
+```bash
+docker compose up -d --build   # http://localhost:8000
+docker compose down            # os dados ficam nos volumes (use -v para apagá-los)
+```
+
+O container aplica as migrations ao iniciar e guarda o SQLite em um volume (`/data`).

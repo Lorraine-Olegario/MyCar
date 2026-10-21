@@ -1,0 +1,11 @@
+.git
+.claude
+node_modules
+vendor
+public/build
+public/hot
+storage/logs/*
+storage/framework/views/*
+database/*.sqlite
+.env
+tarefas
