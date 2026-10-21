@@ -29,6 +29,8 @@ export function formatCell(type, value) {
             return decimal(value, 2);
         case 'decimal3':
             return decimal(value, 3);
+        case 'price':
+            return `R$ ${decimal(value, 3)}`;
         case 'percent':
             return `${decimal(value, 1)}%`;
         case 'km':

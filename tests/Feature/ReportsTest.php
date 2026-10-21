@@ -81,7 +81,7 @@ class ReportsTest extends TestCase
     {
         $this->get('/reports')->assertOk()->assertInertia(fn (Assert $page) => $page
             ->component('Reports/Index')
-            ->has('reports', 5)
+            ->has('reports', 9)
             ->where('reports.0.key', 'monthly-by-vehicle')
             ->where('reports.4.key', 'by-category'));
     }
@@ -268,7 +268,7 @@ class ReportsTest extends TestCase
 
             foreach ($report->columns($filters, $rows) as $column) {
                 $this->assertArrayHasKey('key', $column);
-                $this->assertContains($column['type'], ['text', 'date', 'month', 'year', 'number', 'currency', 'currency_decimal', 'decimal2', 'decimal3', 'percent', 'km']);
+                $this->assertContains($column['type'], ['text', 'date', 'month', 'year', 'number', 'currency', 'currency_decimal', 'decimal2', 'decimal3', 'price', 'percent', 'km']);
             }
         }
     }
