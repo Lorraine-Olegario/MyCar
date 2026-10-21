@@ -10,6 +10,10 @@ const props = defineProps({
         type: String,
         default: undefined,
     },
+    size: {
+        type: String,
+        default: 'md',
+    },
 });
 
 const emit = defineEmits(['close']);
@@ -51,7 +55,8 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown));
                 aria-modal="true"
                 :aria-labelledby="labelledBy"
                 tabindex="-1"
-                class="relative w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl focus:outline-none"
+                class="relative max-h-[90vh] w-full overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl focus:outline-none"
+                :class="size === 'lg' ? 'max-w-2xl' : 'max-w-md'"
             >
                 <slot />
             </div>
