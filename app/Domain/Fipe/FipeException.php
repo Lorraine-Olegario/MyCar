@@ -19,6 +19,8 @@ class FipeException extends RuntimeException
 
     public const MALFORMED = 'malformed';
 
+    public const MISMATCH = 'mismatch';
+
     private function __construct(public readonly string $reason, string $message, ?Throwable $previous = null)
     {
         parent::__construct($message, 0, $previous);
@@ -37,6 +39,14 @@ class FipeException extends RuntimeException
     public static function notFound(): self
     {
         return new self(self::NOT_FOUND, 'A FIPE não encontrou essa combinação de marca, modelo e ano.');
+    }
+
+    /**
+     * A FIPE respondeu, mas a combinação não é a do veículo (marca, modelo/versão ou ano).
+     */
+    public static function mismatch(string $detail): self
+    {
+        return new self(self::MISMATCH, 'A cotação retornada não corresponde a este veículo: '.$detail.' Escolha outra versão ou ano.');
     }
 
     public static function malformed(?Throwable $previous = null): self

@@ -43,6 +43,7 @@ return [
         'retry_sleep_ms' => (int) env('FIPE_RETRY_SLEEP_MS', 200),
         'cache_ttl' => (int) env('FIPE_CACHE_TTL', 86400),
         'cache_prefix' => env('FIPE_CACHE_PREFIX', 'fipe'),
+        'stale_days' => (int) env('FIPE_STALE_DAYS', 35),
     ],
 
 ];
