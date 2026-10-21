@@ -19,11 +19,9 @@ class MaintenanceFactory extends Factory
      */
     public function definition(): array
     {
-        $expense = Expense::factory()->create();
-
         return [
-            'vehicle_id' => $expense->vehicle_id,
-            'expense_id' => $expense->id,
+            'expense_id' => Expense::factory(),
+            'vehicle_id' => fn (array $attributes) => Expense::query()->findOrFail($attributes['expense_id'])->vehicle_id,
             'type' => MaintenanceType::Preventive,
             'odometer' => null,
             'next_due_on' => null,
