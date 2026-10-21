@@ -1,6 +1,6 @@
 <script setup>
 import { Head } from '@inertiajs/vue3';
-import EmptyState from '../components/EmptyState.vue';
+import EmptyState from '../components/ui/EmptyState.vue';
 </script>
 
 <template>
