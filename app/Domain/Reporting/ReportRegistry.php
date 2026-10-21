@@ -4,6 +4,7 @@ namespace App\Domain\Reporting;
 
 use App\Domain\Reporting\Reports\CategoryReport;
 use App\Domain\Reporting\Reports\ExpenseHistoryReport;
+use App\Domain\Reporting\Reports\FipeEvolutionReport;
 use App\Domain\Reporting\Reports\ForecastVsPaidReport;
 use App\Domain\Reporting\Reports\FuelHistoryReport;
 use App\Domain\Reporting\Reports\MonthlyByVehicleReport;
@@ -29,6 +30,7 @@ class ReportRegistry
         CategoryReport::class,
         FuelHistoryReport::class,
         ForecastVsPaidReport::class,
+        FipeEvolutionReport::class,
         OwnershipCostReport::class,
         SaleResultReport::class,
     ];

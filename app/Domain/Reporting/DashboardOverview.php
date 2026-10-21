@@ -2,6 +2,7 @@
 
 namespace App\Domain\Reporting;
 
+use App\Domain\Fipe\FipeFleetSummary;
 use App\Domain\Fuel\FuelConsumptionCalculator;
 use App\Domain\Maintenance\MaintenanceDueQueries;
 use App\Enums\VehicleStatus;
@@ -23,6 +24,7 @@ class DashboardOverview
         private readonly FinancialQueries $queries,
         private readonly MaintenanceDueQueries $maintenanceDue,
         private readonly FuelConsumptionCalculator $consumption,
+        private readonly FipeFleetSummary $fipeFleet,
     ) {}
 
     /**
@@ -40,6 +42,7 @@ class DashboardOverview
         $nextMonths = $vehicleScope->withPeriod(Period::between($today, $today->addMonthsNoOverflow(3)->endOfMonth()));
 
         $hero = $this->heroVehicle($filters);
+        $fipe = $this->fipeFleet->summarize($filters->vehicleId);
 
         return [
             'filters' => $echo,
@@ -58,9 +61,10 @@ class DashboardOverview
                 'year_cents' => $this->queries->totals($year)['total_cents'],
                 'total_cents' => $this->queries->totals($vehicleScope)['total_cents'],
                 'forecast_cents' => $this->queries->forecastVsPaid($nextMonths)['forecast_cents'],
-                // Preenchido na Fase 5; até lá o indicador aparece como "não consultado".
-                'fipe_cents' => null,
+                // Referência de mercado dos veículos ativos com cotação atual; nunca soma a gastos.
+                'fipe_cents' => $fipe['total_cents'],
             ],
+            'fipe' => $fipe,
             'indicators' => $this->indicators($hero, $today),
             'charts' => [
                 'monthly' => $this->queries->monthlySeries($filters),

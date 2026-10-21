@@ -20,6 +20,7 @@ const props = defineProps({
     period: { type: Object, default: () => ({ from: null, to: null }) },
     vehicles: { type: Array, default: () => [] },
     kpis: { type: Object, default: () => ({}) },
+    fipe: { type: Object, default: () => ({ total_cents: null, vehicles: 0, with_quote: 0, stale: 0, missing: 0 }) },
     indicators: { type: Object, default: () => ({}) },
     charts: { type: Object, default: () => ({ monthly: [], categories: [], vehicles: [] }) },
     upcoming: { type: Array, default: () => [] },
@@ -90,6 +91,26 @@ const byVehicle = computed(() => ({
     labels: props.charts.vehicles.map((item) => item.name),
     series: [{ label: 'Gastos', values: props.charts.vehicles.map((item) => item.total_cents) }],
 }));
+
+const fipeHint = computed(() => {
+    const { vehicles, with_quote: withQuote, stale, missing } = props.fipe;
+
+    if (vehicles === 0) {
+        return 'Referência de mercado, separada dos gastos';
+    }
+
+    const parts = [`${withQuote} de ${vehicles} com cotação atual`];
+
+    if (stale > 0) {
+        parts.push(`${stale} desatualizado${stale === 1 ? '' : 's'}`);
+    }
+
+    if (missing > 0) {
+        parts.push(`${missing} sem consulta`);
+    }
+
+    return `${parts.join(' · ')}. Referência de mercado, fora dos gastos.`;
+});
 
 const isEmptyInstall = computed(() => props.vehicles.length === 0);
 </script>
@@ -196,7 +217,7 @@ const isEmptyInstall = computed(() => props.vehicles.length === 0);
                 <KpiCard label="Total do mês" :value="money(kpis.month_cents)" hint="Despesas realizadas neste mês" />
                 <KpiCard label="Total do ano" :value="money(kpis.year_cents)" hint="Despesas realizadas neste ano" />
                 <KpiCard label="Total histórico" :value="money(kpis.total_cents)" hint="Todas as despesas registradas" />
-                <KpiCard label="Valor FIPE da frota ativa" :value="money(kpis.fipe_cents)" empty-text="Não consultado" hint="Referência de mercado, separada dos gastos" />
+                <KpiCard label="Valor FIPE da frota ativa" :value="money(kpis.fipe_cents)" empty-text="Não consultado" :hint="fipeHint" />
                 <KpiCard label="Previsões dos próximos 3 meses" :value="money(kpis.forecast_cents)" hint="Recorrências em aberto; não são gastos pagos" />
             </div>
 
