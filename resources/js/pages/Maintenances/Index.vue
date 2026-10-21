@@ -1,6 +1,6 @@
 <script setup>
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { computed, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 import BaseCurrencyInput from '../../components/ui/BaseCurrencyInput.vue';
 import BaseDateInput from '../../components/ui/BaseDateInput.vue';
@@ -16,6 +16,7 @@ import { formatCurrency, formatDate, formatKm } from '../../utils/format';
 const props = defineProps({
     maintenances: { type: Object, required: true },
     filters: { type: Object, default: () => ({}) },
+    editing: { type: Object, default: null },
     options: { type: Object, default: () => ({ vehicles: [], categories: [], types: [], payment_methods: [] }) },
 });
 
@@ -111,6 +112,13 @@ const openEdit = (item) => {
     form.notes = item.notes ?? '';
     formOpen.value = true;
 };
+
+// Link de edição vindo de outra tela (?edit=ID): abre o formulário existente, sem duplicá-lo.
+onMounted(() => {
+    if (props.editing) {
+        openEdit(props.editing);
+    }
+});
 
 const submit = () => {
     const options = { preserveScroll: true, onSuccess: () => (formOpen.value = false) };

@@ -13,6 +13,7 @@ use App\Models\Vehicle;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -47,23 +48,16 @@ class MaintenanceController extends Controller
             ->get()
             ->mapWithKeys(fn ($row) => ["{$row->vehicle_id}:{$row->expense_category_id}" => substr((string) $row->latest, 0, 10)]);
 
-        $maintenances = $query->paginate(20)->withQueryString()->through(function (Maintenance $maintenance) use ($latestByCategory) {
-            $expense = $maintenance->expense;
-            $isCurrent = ($latestByCategory["{$maintenance->vehicle_id}:{$expense->expense_category_id}"] ?? null) === $expense->occurred_on->toDateString();
+        $maintenances = $query->paginate(20)->withQueryString()
+            ->through(fn (Maintenance $maintenance) => $this->row($maintenance, $latestByCategory));
 
-            return [
-                ...Arr::only($maintenance->toArray(), ['id', 'vehicle_id', 'type', 'odometer', 'next_due_on', 'next_due_odometer', 'notes']),
-                'expense' => Arr::only($expense->toArray(), ['id', 'description', 'amount_cents', 'occurred_on', 'expense_category_id', 'vendor', 'payment_method']),
-                'category' => $expense->category?->only(['id', 'name', 'color']),
-                'vehicle_name' => $maintenance->vehicle?->name,
-                'due' => $isCurrent
-                    ? $this->due->evaluate($maintenance, $maintenance->vehicle?->odometer)
-                    : ['status' => 'none', 'days_remaining' => null, 'km_remaining' => null, 'reason' => null],
-            ];
-        });
+        $editing = $request->filled('edit')
+            ? Maintenance::query()->with(['expense.category:id,name,color', 'vehicle:id,name,odometer,deleted_at'])->find($request->integer('edit'))
+            : null;
 
         return Inertia::render('Maintenances/Index', [
             'maintenances' => $maintenances,
+            'editing' => $editing ? $this->row($editing, $latestByCategory) : null,
             'filters' => ['vehicle_id' => $vehicleId],
             'options' => [
                 'vehicles' => Vehicle::query()->orderBy('name')->get(['id', 'name', 'brand', 'model', 'version', 'odometer'])
@@ -74,6 +68,26 @@ class MaintenanceController extends Controller
                 'payment_methods' => array_map(fn (PaymentMethod $method) => ['value' => $method->value, 'label' => $method->label()], PaymentMethod::cases()),
             ],
         ]);
+    }
+
+    /**
+     * @param  Collection<string, string>  $latestByCategory
+     * @return array<string, mixed>
+     */
+    private function row(Maintenance $maintenance, $latestByCategory): array
+    {
+        $expense = $maintenance->expense;
+        $isCurrent = ($latestByCategory["{$maintenance->vehicle_id}:{$expense->expense_category_id}"] ?? null) === $expense->occurred_on->toDateString();
+
+        return [
+            ...Arr::only($maintenance->toArray(), ['id', 'vehicle_id', 'type', 'odometer', 'next_due_on', 'next_due_odometer', 'notes']),
+            'expense' => Arr::only($expense->toArray(), ['id', 'description', 'amount_cents', 'occurred_on', 'expense_category_id', 'vendor', 'payment_method']),
+            'category' => $expense->category?->only(['id', 'name', 'color']),
+            'vehicle_name' => $maintenance->vehicle?->name,
+            'due' => $isCurrent
+                ? $this->due->evaluate($maintenance, $maintenance->vehicle?->odometer)
+                : ['status' => 'none', 'days_remaining' => null, 'km_remaining' => null, 'reason' => null],
+        ];
     }
 
     public function store(MaintenanceRequest $request): RedirectResponse

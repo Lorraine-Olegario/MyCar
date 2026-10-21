@@ -12,6 +12,7 @@ use App\Models\RecurringExpenseOccurrence;
 use App\Models\Vehicle;
 use DomainException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -19,7 +20,7 @@ class RecurringExpenseController extends Controller
 {
     public function __construct(private readonly RecurringExpenseService $service) {}
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $recurring = RecurringExpense::query()
             ->with(['category:id,name,color', 'vehicle:id,name,deleted_at'])
@@ -37,6 +38,7 @@ class RecurringExpenseController extends Controller
         return Inertia::render('Recurring/Index', [
             'recurring' => $recurring,
             'occurrences' => $occurrences,
+            'editing_id' => $request->integer('edit') ?: null,
             'upcoming' => $this->service->upcoming(),
             'summary' => $this->service->monthSummary(now()),
             'options' => [

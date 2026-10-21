@@ -4,6 +4,7 @@ import { computed, ref } from 'vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 import ConfirmDialog from '../../components/ui/ConfirmDialog.vue';
 import VehicleFinancial from '../../components/vehicle/VehicleFinancial.vue';
+import VehicleHistory from '../../components/vehicle/VehicleHistory.vue';
 import { formatCurrency, formatDate, formatKm } from '../../utils/format';
 import { optionLabel } from '../../utils/options';
 
@@ -13,6 +14,10 @@ const props = defineProps({
         required: true,
     },
     financial: {
+        type: Object,
+        required: true,
+    },
+    history: {
         type: Object,
         required: true,
     },
@@ -76,35 +81,6 @@ const saleResultClass = computed(() => {
 
     return result > 0 ? 'text-emerald-300' : 'text-rose-300';
 });
-
-const tabs = [
-    {
-        id: 'expenses',
-        label: 'Despesas',
-        placeholder: 'Despesas avulsas, recorrentes e manutenções entram na Fase 3.',
-    },
-    {
-        id: 'fuelings',
-        label: 'Abastecimentos',
-        placeholder: 'Abastecimentos, consumo e custo por quilômetro entram na Fase 3.',
-    },
-    {
-        id: 'maintenances',
-        label: 'Manutenções',
-        placeholder: 'O histórico de manutenções entra na Fase 3.',
-    },
-    {
-        id: 'fipe',
-        label: 'FIPE',
-        placeholder: 'A consulta e o histórico de valores FIPE entram na Fase 5.',
-    },
-];
-
-const activeTab = ref(tabs[0].id);
-
-const activePlaceholder = computed(
-    () => tabs.find((tab) => tab.id === activeTab.value)?.placeholder ?? '',
-);
 
 const confirmArchive = () => {
     archiving.value = true;
@@ -265,7 +241,7 @@ const confirmArchive = () => {
             </section>
         </div>
 
-        <VehicleFinancial :vehicle="vehicle" :financial="financial" />
+        <VehicleFinancial :vehicle="vehicle" :financial="financial" :history="history" />
 
         <section class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
             <h2 class="text-sm font-semibold uppercase tracking-widest text-indigo-400">
@@ -277,43 +253,7 @@ const confirmArchive = () => {
             </p>
         </section>
 
-        <section class="rounded-2xl border border-slate-800 bg-slate-900/40">
-            <div
-                role="tablist"
-                aria-label="Históricos do veículo"
-                class="flex flex-wrap gap-1 border-b border-slate-800 p-2"
-            >
-                <button
-                    v-for="tab in tabs"
-                    :key="tab.id"
-                    :id="`vehicle-tab-${tab.id}`"
-                    type="button"
-                    role="tab"
-                    :aria-selected="activeTab === tab.id"
-                    :aria-controls="`vehicle-panel-${tab.id}`"
-                    :tabindex="activeTab === tab.id ? 0 : -1"
-                    class="rounded-lg px-3 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
-                    :class="
-                        activeTab === tab.id
-                            ? 'bg-slate-800 text-slate-100'
-                            : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
-                    "
-                    @click="activeTab = tab.id"
-                >
-                    {{ tab.label }}
-                </button>
-            </div>
-
-            <div
-                :id="`vehicle-panel-${activeTab}`"
-                role="tabpanel"
-                :aria-labelledby="`vehicle-tab-${activeTab}`"
-                tabindex="0"
-                class="p-6 focus:outline-none"
-            >
-                <p class="text-sm leading-relaxed text-slate-400">{{ activePlaceholder }}</p>
-            </div>
-        </section>
+        <VehicleHistory :vehicle="vehicle" :history="history" :selection="financial.selection" />
 
         <ConfirmDialog
             :show="confirmingArchive"

@@ -54,6 +54,7 @@ class FuelingController extends Controller
             'fuelings' => $fuelings,
             'filters' => $filters,
             'summary' => $overview->summary($filtered, $segments),
+            'editing' => $request->filled('edit') ? Fueling::query()->find($request->integer('edit')) : null,
             'monthly' => $overview->totalsBy($filtered, 'Y-m'),
             'yearly' => $overview->totalsBy($filtered, 'Y'),
             'options' => [

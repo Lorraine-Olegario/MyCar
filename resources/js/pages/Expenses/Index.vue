@@ -1,6 +1,6 @@
 <script setup>
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { computed, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 import BaseCurrencyInput from '../../components/ui/BaseCurrencyInput.vue';
 import BaseDateInput from '../../components/ui/BaseDateInput.vue';
@@ -18,6 +18,7 @@ const props = defineProps({
     expenses: { type: Object, required: true },
     filters: { type: Object, default: () => ({}) },
     total_cents: { type: Number, default: 0 },
+    editing: { type: Object, default: null },
     options: {
         type: Object,
         default: () => ({ vehicles: [], categories: [], payment_methods: [] }),
@@ -163,6 +164,13 @@ const openEdit = (expense) => {
     form.remove_receipt = false;
     formOpen.value = true;
 };
+
+// Link de edição vindo de outra tela (?edit=ID): abre o formulário existente, sem duplicá-lo.
+onMounted(() => {
+    if (props.editing) {
+        openEdit(props.editing);
+    }
+});
 
 const closeForm = () => {
     formOpen.value = false;

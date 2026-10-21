@@ -11,6 +11,7 @@ import { formatCurrency, formatDate, formatMonthYear } from '../../utils/format'
 const props = defineProps({
     vehicle: { type: Object, required: true },
     financial: { type: Object, required: true },
+    history: { type: Object, default: null },
 });
 
 const loading = ref(false);
@@ -35,9 +36,16 @@ const select = (key, value) => {
         month: key === 'month' ? value : (key === 'year' ? '' : (selection.value.month ?? '')),
     };
 
-    if (params.month === '') {
-        delete params.month;
+    // Trocar o período financeiro não pode tirar o usuário da aba e dos filtros em que estava.
+    if (props.history) {
+        Object.assign(params, { tab: props.history.tab, ...props.history.filters });
     }
+
+    Object.keys(params).forEach((name) => {
+        if (params[name] === '' || params[name] === null) {
+            delete params[name];
+        }
+    });
 
     router.get(`/vehicles/${props.vehicle.id}`, params, {
         preserveState: true,
