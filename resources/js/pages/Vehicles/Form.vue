@@ -168,7 +168,11 @@ const cancelHref = computed(() =>
 
 const submit = () => {
     if (isEditing.value) {
-        form.put(`/vehicles/${props.vehicle.id}`, { preserveScroll: true });
+        // PUT não aceita multipart no PHP: com `_method` o upload da foto também funciona na edição.
+        form.transform((data) => ({ ...data, _method: 'put' })).post(`/vehicles/${props.vehicle.id}`, {
+            preserveScroll: true,
+            forceFormData: true,
+        });
 
         return;
     }
