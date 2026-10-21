@@ -47,6 +47,20 @@ const onPeriod = ({ period, from, to }) => {
 
 const toggle = (key, checked) => set(key, checked ? '1' : '');
 
+const csvHref = computed(() => {
+    const params = new URLSearchParams();
+
+    Object.entries(form).forEach(([key, value]) => {
+        if (String(value) !== '') {
+            params.set(key, value);
+        }
+    });
+
+    const query = params.toString();
+
+    return `/reports/${props.report.key}/csv${query ? `?${query}` : ''}`;
+});
+
 const chartData = computed(() => {
     if (!props.chart) {
         return null;
@@ -74,6 +88,13 @@ const align = (column) => (isNumericType(column.type) ? 'text-right font-mono' :
                 <p class="mt-1 max-w-prose text-sm text-slate-400">{{ report.description }}</p>
             </div>
 
+            <!-- Link comum (não Inertia): o navegador baixa o arquivo com os filtros atuais. -->
+            <a
+                :href="csvHref"
+                class="rounded-xl border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm font-medium text-slate-100 transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+            >
+                Exportar CSV
+            </a>
         </header>
 
         <form class="space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5" aria-label="Filtros do relatório" @submit.prevent="apply">
