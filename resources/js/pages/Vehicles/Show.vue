@@ -4,6 +4,7 @@ import { computed, ref } from 'vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 import ConfirmDialog from '../../components/ui/ConfirmDialog.vue';
 import VehicleFinancial from '../../components/vehicle/VehicleFinancial.vue';
+import VehicleFipe from '../../components/vehicle/VehicleFipe.vue';
 import VehicleHistory from '../../components/vehicle/VehicleHistory.vue';
 import { formatCurrency, formatDate, formatKm } from '../../utils/format';
 import { optionLabel } from '../../utils/options';
@@ -18,6 +19,10 @@ const props = defineProps({
         required: true,
     },
     history: {
+        type: Object,
+        required: true,
+    },
+    fipe: {
         type: Object,
         required: true,
     },
@@ -252,6 +257,8 @@ const confirmArchive = () => {
                 {{ vehicle.notes || 'Sem observações registradas.' }}
             </p>
         </section>
+
+        <VehicleFipe :vehicle="vehicle" :fipe="fipe" />
 
         <VehicleHistory :vehicle="vehicle" :history="history" :selection="financial.selection" />
 
