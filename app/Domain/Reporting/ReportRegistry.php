@@ -4,8 +4,12 @@ namespace App\Domain\Reporting;
 
 use App\Domain\Reporting\Reports\CategoryReport;
 use App\Domain\Reporting\Reports\ExpenseHistoryReport;
+use App\Domain\Reporting\Reports\ForecastVsPaidReport;
+use App\Domain\Reporting\Reports\FuelHistoryReport;
 use App\Domain\Reporting\Reports\MonthlyByVehicleReport;
+use App\Domain\Reporting\Reports\OwnershipCostReport;
 use App\Domain\Reporting\Reports\Report;
+use App\Domain\Reporting\Reports\SaleResultReport;
 use App\Domain\Reporting\Reports\VehicleComparisonReport;
 use App\Domain\Reporting\Reports\YearlyByVehicleReport;
 
@@ -23,6 +27,10 @@ class ReportRegistry
         ExpenseHistoryReport::class,
         VehicleComparisonReport::class,
         CategoryReport::class,
+        FuelHistoryReport::class,
+        ForecastVsPaidReport::class,
+        OwnershipCostReport::class,
+        SaleResultReport::class,
     ];
 
     /**

@@ -20,6 +20,7 @@ class ReportBuilder
     public function build(Report $report, array $input, ?CarbonInterface $today = null): array
     {
         [$filters, $echo] = ReportFilters::fromInput($input, $today, $report->defaultPeriod());
+        $filters = $report->adjustFilters($filters);
 
         $rows = $report->rows($filters);
 
