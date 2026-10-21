@@ -162,6 +162,41 @@ class RecurringExpenseService
     }
 
     /**
+     * Próximos vencimentos (previsões em aberto), incluindo as já vencidas, do mais
+     * antigo para o mais novo. Reutilizável pelo dashboard e pela página do veículo.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function upcoming(int $withinDays = 90, ?int $vehicleId = null, int $limit = 10, ?CarbonInterface $today = null): array
+    {
+        $today = CarbonImmutable::instance($today ?? now())->startOfDay();
+
+        return RecurringExpenseOccurrence::query()
+            ->forecast()
+            ->whereDate('due_date', '<=', $today->addDays($withinDays)->toDateString())
+            ->whereHas('recurringExpense', fn ($query) => $query
+                ->where('active', true)
+                ->when($vehicleId, fn ($query) => $query->where('vehicle_id', $vehicleId)))
+            ->with('recurringExpense.vehicle:id,name,brand,model,version,deleted_at')
+            ->orderBy('due_date')
+            ->orderBy('id')
+            ->limit($limit)
+            ->get()
+            ->map(fn (RecurringExpenseOccurrence $occurrence) => [
+                'id' => $occurrence->id,
+                'description' => $occurrence->recurringExpense->description,
+                'vehicle_id' => $occurrence->recurringExpense->vehicle_id,
+                'vehicle_name' => $occurrence->recurringExpense->vehicle?->name,
+                'due_date' => $occurrence->due_date->toDateString(),
+                'expected_amount_cents' => $occurrence->expected_amount_cents,
+                'days_until_due' => (int) $today->diffInDays($occurrence->due_date->startOfDay(), false),
+                'is_overdue' => $occurrence->due_date->startOfDay()->lt($today),
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
      * Resumo do mês, com os dois valores sempre separados: a estimativa proporcional
      * (ex.: anual ÷ 12) e o que foi efetivamente pago no mês. Previsões não entram no pago.
      *

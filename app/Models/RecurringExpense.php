@@ -30,6 +30,13 @@ class RecurringExpense extends Model
     ];
 
     /**
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'active' => true,
+    ];
+
+    /**
      * @var list<string>
      */
     protected $appends = [
