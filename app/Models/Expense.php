@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Expense extends Model
 {
@@ -97,6 +98,14 @@ class Expense extends Model
     public function recurringExpense(): BelongsTo
     {
         return $this->belongsTo(RecurringExpense::class);
+    }
+
+    /**
+     * @return HasOne<Maintenance, $this>
+     */
+    public function maintenance(): HasOne
+    {
+        return $this->hasOne(Maintenance::class);
     }
 
     public function getHasReceiptAttribute(): bool

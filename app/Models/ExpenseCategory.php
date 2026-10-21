@@ -13,6 +13,21 @@ class ExpenseCategory extends Model
     use HasFactory;
 
     /**
+     * Categorias que aceitam registro de manutenção (slugs do seeder inicial).
+     *
+     * @var list<string>
+     */
+    public const MAINTENANCE_SLUGS = [
+        'troca-de-oleo-e-filtros',
+        'manutencao-preventiva',
+        'manutencao-corretiva',
+        'pneus-e-alinhamento',
+        'freios',
+        'bateria-e-sistema-eletrico',
+        'motor-e-transmissao',
+    ];
+
+    /**
      * @var list<string>
      */
     protected $fillable = [
@@ -72,6 +87,11 @@ class ExpenseCategory extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('active', true);
+    }
+
+    public function scopeForMaintenance(Builder $query): Builder
+    {
+        return $query->whereIn('slug', self::MAINTENANCE_SLUGS);
     }
 
     public function scopeOrdered(Builder $query): Builder
