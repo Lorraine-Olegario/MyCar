@@ -31,6 +31,17 @@ class VehicleController extends Controller
             'archived' => $request->boolean('archived'),
         ];
 
+        // `view` é o filtro histórico explícito: active, sold ou archived. Vazio = ativos e vendidos.
+        $view = (string) $request->string('view');
+
+        if ($view === 'archived') {
+            $filters['archived'] = true;
+        } elseif (in_array($view, ['active', 'sold'], true)) {
+            $filters['status'] = $view;
+        }
+
+        $filters['view'] = $filters['archived'] ? 'archived' : ($filters['status'] !== '' ? $filters['status'] : '');
+
         $vehicles = Vehicle::query()
             ->when($filters['search'] !== '', function ($query) use ($filters) {
                 $search = '%'.$filters['search'].'%';
@@ -53,6 +64,11 @@ class VehicleController extends Controller
         return Inertia::render('Vehicles/Index', [
             'vehicles' => $vehicles,
             'filters' => $filters,
+            'counts' => [
+                'active' => Vehicle::query()->active()->count(),
+                'sold' => Vehicle::query()->sold()->count(),
+                'archived' => Vehicle::query()->archived()->count(),
+            ],
             'options' => $this->options(),
         ]);
     }
