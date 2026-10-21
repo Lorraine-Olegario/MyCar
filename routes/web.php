@@ -6,6 +6,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\FuelingController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\RecurringExpenseController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -29,7 +30,8 @@ Route::post('recurring/occurrences/{occurrence}/pay', [RecurringExpenseControlle
 Route::patch('recurring/occurrences/{occurrence}/cancel', [RecurringExpenseController::class, 'cancel'])->name('recurring.occurrences.cancel');
 Route::resource('maintenances', MaintenanceController::class)->only(['index', 'store', 'update', 'destroy']);
 Route::resource('fuelings', FuelingController::class)->only(['index', 'store', 'update', 'destroy']);
-Route::get('/reports', fn () => Inertia::render('Reports/Index'))->name('reports.index');
+Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+Route::get('/reports/{report}', [ReportController::class, 'show'])->name('reports.show');
 Route::resource('categories', ExpenseCategoryController::class)
     ->only(['index', 'store', 'update', 'destroy']);
 Route::patch('categories/{category}/toggle', [ExpenseCategoryController::class, 'toggle'])->name('categories.toggle');

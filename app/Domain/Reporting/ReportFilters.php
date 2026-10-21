@@ -26,7 +26,7 @@ final class ReportFilters
      * (para a interface refletir exatamente o que foi aplicado).
      *
      * @param  array<string, mixed>  $input
-     * @return array{0: self, 1: array{period: string, from: string, to: string, vehicle_id: string, category_id: string}}
+     * @return array{0: self, 1: array{period: string, from: string, to: string, vehicle_id: string, category_id: string, include_sold: string, include_archived: string}}
      */
     public static function fromInput(array $input, ?CarbonInterface $today = null, string $defaultPeriod = 'last_12_months'): array
     {
@@ -46,20 +46,19 @@ final class ReportFilters
         $vehicleId = isset($input['vehicle_id']) && ctype_digit((string) $input['vehicle_id']) ? (int) $input['vehicle_id'] : null;
         $categoryId = isset($input['category_id']) && ctype_digit((string) $input['category_id']) ? (int) $input['category_id'] : null;
 
+        $includeSold = filter_var($input['include_sold'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $includeArchived = filter_var($input['include_archived'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
         return [
-            new self(
-                $period,
-                $vehicleId,
-                $categoryId,
-                filter_var($input['include_sold'] ?? false, FILTER_VALIDATE_BOOLEAN),
-                filter_var($input['include_archived'] ?? false, FILTER_VALIDATE_BOOLEAN),
-            ),
+            new self($period, $vehicleId, $categoryId, $includeSold, $includeArchived),
             [
                 'period' => $preset,
                 'from' => $preset === 'custom' ? $period->from->toDateString() : '',
                 'to' => $preset === 'custom' ? $period->to->toDateString() : '',
                 'vehicle_id' => $vehicleId !== null ? (string) $vehicleId : '',
                 'category_id' => $categoryId !== null ? (string) $categoryId : '',
+                'include_sold' => $includeSold ? '1' : '',
+                'include_archived' => $includeArchived ? '1' : '',
             ],
         ];
     }
