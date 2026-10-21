@@ -95,4 +95,64 @@ class VehicleTest extends TestCase
         $this->assertNotNull($vehicle->sale_date);
         $this->assertNotNull($vehicle->sale_price_cents);
     }
+
+    public function test_photo_url_points_to_the_controlled_route_and_hides_the_private_path(): void
+    {
+        $vehicle = Vehicle::factory()->create(['photo_path' => null]);
+
+        $this->assertNull($vehicle->photo_url);
+
+        $vehicle->update(['photo_path' => 'vehicles/'.$vehicle->id.'/foto.jpg']);
+
+        $this->assertSame(route('vehicles.photo', $vehicle), $vehicle->photo_url);
+        $this->assertArrayNotHasKey('photo_path', $vehicle->toArray());
+        $this->assertSame($vehicle->photo_url, $vehicle->toArray()['photo_url']);
+    }
+
+    public function test_archived_appended_flag_follows_soft_delete(): void
+    {
+        $vehicle = Vehicle::factory()->create();
+
+        $this->assertFalse($vehicle->archived);
+        $this->assertTrue($vehicle->toArray()['archived'] === false);
+
+        $vehicle->delete();
+
+        $archived = Vehicle::withTrashed()->findOrFail($vehicle->id);
+
+        $this->assertTrue($archived->archived);
+        $this->assertTrue($archived->isArchived());
+    }
+
+    public function test_sale_result_requires_purchase_and_sale_prices(): void
+    {
+        $withoutSale = Vehicle::factory()->create([
+            'purchase_price_cents' => 5_000_000,
+            'sale_price_cents' => null,
+            'sale_date' => null,
+        ]);
+
+        $withoutPurchase = Vehicle::factory()->create([
+            'purchase_price_cents' => null,
+            'sale_price_cents' => 6_200_000,
+            'sale_date' => '2024-05-01',
+        ]);
+
+        $profit = Vehicle::factory()->create([
+            'purchase_price_cents' => 5_000_000,
+            'sale_price_cents' => 6_200_000,
+            'sale_date' => '2024-05-01',
+        ]);
+
+        $loss = Vehicle::factory()->create([
+            'purchase_price_cents' => 5_000_000,
+            'sale_price_cents' => 4_500_000,
+            'sale_date' => '2024-05-01',
+        ]);
+
+        $this->assertNull($withoutSale->sale_result_cents);
+        $this->assertNull($withoutPurchase->sale_result_cents);
+        $this->assertSame(1_200_000, $profit->sale_result_cents);
+        $this->assertSame(-500_000, $loss->sale_result_cents);
+    }
 }

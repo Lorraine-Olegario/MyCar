@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Domain\Vehicles\VehiclePhotoStorage;
+use App\Enums\FuelType;
+use App\Enums\VehicleCategory;
+use App\Enums\VehicleStatus;
 use App\Http\Requests\StoreVehicleRequest;
 use App\Http\Requests\UpdateVehicleRequest;
 use App\Models\Vehicle;
@@ -50,6 +53,7 @@ class VehicleController extends Controller
         return Inertia::render('Vehicles/Index', [
             'vehicles' => $vehicles,
             'filters' => $filters,
+            'options' => $this->options(),
         ]);
     }
 
@@ -60,7 +64,37 @@ class VehicleController extends Controller
     {
         return Inertia::render('Vehicles/Show', [
             'vehicle' => $vehicle,
+            'options' => $this->options(),
         ]);
+    }
+
+    /**
+     * Rótulos em português das listas fechadas usadas nas páginas de veículos.
+     *
+     * @return array{statuses: list<array{value: string, label: string}>, categories: list<array{value: string, label: string}>, fuels: list<array{value: string, label: string}>}
+     */
+    private function options(): array
+    {
+        return [
+            'statuses' => $this->enumOptions(VehicleStatus::cases()),
+            'categories' => $this->enumOptions(VehicleCategory::cases()),
+            'fuels' => $this->enumOptions(FuelType::cases()),
+        ];
+    }
+
+    /**
+     * @param  list<VehicleStatus|VehicleCategory|FuelType>  $cases
+     * @return list<array{value: string, label: string}>
+     */
+    private function enumOptions(array $cases): array
+    {
+        return array_map(
+            fn (VehicleStatus|VehicleCategory|FuelType $case): array => [
+                'value' => $case->value,
+                'label' => $case->label(),
+            ],
+            $cases,
+        );
     }
 
     /**
