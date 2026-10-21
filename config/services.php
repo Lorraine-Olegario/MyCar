@@ -35,4 +35,14 @@ return [
         ],
     ],
 
+    'fipe' => [
+        'base_url' => env('FIPE_BASE_URL', 'https://fipe.parallelum.com.br/api/v2'),
+        'token' => env('FIPE_TOKEN'),
+        'timeout' => (int) env('FIPE_TIMEOUT', 5),
+        'retries' => (int) env('FIPE_RETRIES', 2),
+        'retry_sleep_ms' => (int) env('FIPE_RETRY_SLEEP_MS', 200),
+        'cache_ttl' => (int) env('FIPE_CACHE_TTL', 86400),
+        'cache_prefix' => env('FIPE_CACHE_PREFIX', 'fipe'),
+    ],
+
 ];
