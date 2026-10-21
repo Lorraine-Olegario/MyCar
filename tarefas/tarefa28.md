@@ -20,3 +20,14 @@
   - Validação: `php artisan test --filter=FipeClient`.
 
 **Execução:** implemente somente este item; um item = uma branch = um commit. Rode as validações indicadas. Não avance para a próxima tarefa sem orientação.
+
+---
+
+## Realizado
+
+### Item 1 — Cliente HTTP da API FIPE
+- Branch: `tarefa28/1-cliente-http-fipe`
+- Commit: `097851a`
+- O que foi feito: Configuração `services.fipe` (base_url, token opcional, timeout, retries, cache) e variáveis em `.env.example`. Em `app/Domain/Fipe`: `FipeClient` (marcas, modelos, anos e valor por ano da API Parallelum v2, com timeout curto, retry apenas em falha de conexão/5xx, cache de 24 h só do catálogo e nunca do valor), DTOs `FipeOption` e `FipeQuoteData` (valor em centavos e mês de referência normalizado a partir da resposta), `FipeVehicleType` (carro→cars, moto→motorcycles, caminhões; "outro" exige escolha) e `FipeException` com motivo tipado (indisponível, timeout, 404, resposta inválida) e mensagens em português.
+- Validação: `php artisan test` (276 testes, incluindo `--filter=FipeClient`: 12, todos com `Http::fake` e `preventStrayRequests`; nenhuma chamada à rede real) ok. Endpoints e campos conferidos na documentação oficial (deividfortuna.github.io/fipe/v2).
+- Observações: O token `X-Subscription-Token` é opcional (a doc lista o header sem dizer se é obrigatório). O parâmetro `reference` da API não é usado: o mês de referência vem sempre da resposta. Falhas não são cacheadas.
