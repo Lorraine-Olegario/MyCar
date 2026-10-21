@@ -7,6 +7,9 @@ use Inertia\Inertia;
 Route::get('/', fn () => Inertia::render('Dashboard'))->name('dashboard');
 
 Route::resource('vehicles', VehicleController::class)->except(['create', 'edit']);
+Route::get('vehicles/{vehicle}/photo', [VehicleController::class, 'photo'])
+    ->name('vehicles.photo')
+    ->withTrashed();
 Route::patch('vehicles/{vehicle}/restore', [VehicleController::class, 'restore'])
     ->name('vehicles.restore')
     ->withTrashed();
