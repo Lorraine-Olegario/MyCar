@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Vehicle extends Model
@@ -82,7 +84,29 @@ class Vehicle extends Model
             'acquisition_date' => 'date',
             'sale_date' => 'date',
             'tracking_start_date' => 'date',
+            'fipe_value_cents' => 'integer',
+            'fipe_consulted_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Histórico de cotações FIPE (mais recente primeiro).
+     *
+     * @return HasMany<FipeQuote, $this>
+     */
+    public function fipeQuotes(): HasMany
+    {
+        return $this->hasMany(FipeQuote::class)->orderByDesc('consulted_at')->orderByDesc('id');
+    }
+
+    /**
+     * Cotação mais recente persistida; os campos `fipe_*` do veículo sempre refletem esta.
+     *
+     * @return HasOne<FipeQuote, $this>
+     */
+    public function latestFipeQuote(): HasOne
+    {
+        return $this->hasOne(FipeQuote::class)->latestOfMany(['consulted_at', 'id']);
     }
 
     /**
