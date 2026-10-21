@@ -33,7 +33,8 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // Nada é servido direto do disco privado: arquivos só saem por rotas controladas do app.
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],

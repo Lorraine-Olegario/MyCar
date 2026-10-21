@@ -6,8 +6,13 @@ set -e
 set_env() {
     if grep -q "^$1=" .env; then sed -i "s#^$1=.*#$1=$2#" .env; else echo "$1=$2" >> .env; fi
 }
+set_env APP_ENV "${APP_ENV:-production}"
+set_env APP_DEBUG "${APP_DEBUG:-false}"
+set_env APP_URL "${APP_URL:-http://localhost:8000}"
 set_env DB_DATABASE "${DB_DATABASE:-/var/www/html/database/database.sqlite}"
 touch "${DB_DATABASE:-/var/www/html/database/database.sqlite}"
+# O banco só deve ser legível pelo usuário do app.
+chmod 600 "${DB_DATABASE:-/var/www/html/database/database.sqlite}"
 
 if ! grep -q '^APP_KEY=.\+' .env && [ -z "$APP_KEY" ]; then
     php artisan key:generate --force
