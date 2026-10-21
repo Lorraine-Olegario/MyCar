@@ -81,7 +81,7 @@ class ReportsTest extends TestCase
     {
         $this->get('/reports')->assertOk()->assertInertia(fn (Assert $page) => $page
             ->component('Reports/Index')
-            ->has('reports', 9)
+            ->has('reports', 10)
             ->where('reports.0.key', 'monthly-by-vehicle')
             ->where('reports.4.key', 'by-category'));
     }

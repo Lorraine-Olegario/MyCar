@@ -184,6 +184,12 @@ const consultedAt = (value) => formatDate(String(value).slice(0, 10));
                 Cotação desatualizada: a última consulta foi em {{ consultedAt(snapshot.consulted_at) }} (mais de {{ snapshot.stale_after_days }} dias). Atualize para ver o valor atual.
             </p>
 
+            <p v-if="fipe.variation" class="mt-3 text-sm" :class="fipe.variation.change_cents < 0 ? 'text-rose-300' : 'text-emerald-300'">
+                {{ fipe.variation.change_cents >= 0 ? '+' : '−' }}{{ formatCurrency(Math.abs(fipe.variation.change_cents)) }}
+                <template v-if="fipe.variation.change_percent !== null">({{ fipe.variation.change_percent.toLocaleString('pt-BR') }}%)</template>
+                desde a consulta anterior (referência {{ formatMonthYear(fipe.variation.previous_reference_month) }}).
+            </p>
+
             <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-4">
                 <div><dt class="text-xs text-slate-500">Marca</dt><dd class="text-slate-100">{{ snapshot.brand ?? '—' }}</dd></div>
                 <div><dt class="text-xs text-slate-500">Modelo</dt><dd class="text-slate-100">{{ snapshot.model ?? '—' }}</dd></div>
