@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Vehicles\VehiclePhotoStorage;
 use App\Http\Requests\StoreVehicleRequest;
 use App\Http\Requests\UpdateVehicleRequest;
 use App\Models\Vehicle;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class VehicleController extends Controller
 {
@@ -62,9 +66,15 @@ class VehicleController extends Controller
     /**
      * Cadastra um veículo.
      */
-    public function store(StoreVehicleRequest $request): RedirectResponse
+    public function store(StoreVehicleRequest $request, VehiclePhotoStorage $photos): RedirectResponse
     {
-        $vehicle = Vehicle::create($request->validated());
+        $vehicle = Vehicle::create($request->safe()->except('photo'));
+
+        $photo = $request->file('photo');
+
+        if ($photo instanceof UploadedFile) {
+            $vehicle->update(['photo_path' => $photos->put($vehicle, $photo)]);
+        }
 
         return to_route('vehicles.show', $vehicle)
             ->with('success', 'Veículo cadastrado com sucesso.');
@@ -73,16 +83,26 @@ class VehicleController extends Controller
     /**
      * Atualiza um veículo.
      */
-    public function update(UpdateVehicleRequest $request, Vehicle $vehicle): RedirectResponse
+    public function update(UpdateVehicleRequest $request, Vehicle $vehicle, VehiclePhotoStorage $photos): RedirectResponse
     {
-        $vehicle->update($request->validated());
+        $vehicle->update($request->safe()->except(['photo', 'remove_photo']));
+
+        $photo = $request->file('photo');
+
+        if ($photo instanceof UploadedFile) {
+            $vehicle->update(['photo_path' => $photos->put($vehicle, $photo)]);
+        } elseif ($request->boolean('remove_photo')) {
+            $photos->forget($vehicle);
+            $vehicle->update(['photo_path' => null]);
+        }
 
         return to_route('vehicles.show', $vehicle)
             ->with('success', 'Veículo atualizado com sucesso.');
     }
 
     /**
-     * Arquiva (soft delete) um veículo; nada é apagado fisicamente.
+     * Arquiva (soft delete) um veículo; nada é apagado fisicamente, inclusive
+     * a foto, que é mantida no disco privado para o histórico.
      */
     public function destroy(Vehicle $vehicle): RedirectResponse
     {
@@ -90,6 +110,16 @@ class VehicleController extends Controller
 
         return to_route('vehicles.index')
             ->with('success', 'Veículo arquivado com sucesso.');
+    }
+
+    /**
+     * Serve a foto do veículo a partir do disco privado.
+     */
+    public function photo(Vehicle $vehicle, VehiclePhotoStorage $photos): StreamedResponse
+    {
+        abort_unless($photos->exists($vehicle), 404);
+
+        return Storage::disk(VehiclePhotoStorage::DISK)->response($vehicle->photo_path);
     }
 
     /**
