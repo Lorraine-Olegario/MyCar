@@ -5,8 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class ExpenseCategory extends Model
@@ -85,8 +84,15 @@ class ExpenseCategory extends Model
      */
     public function isInUse(): bool
     {
-        return Schema::hasTable('expenses')
-            && DB::table('expenses')->where('expense_category_id', $this->getKey())->exists();
+        return $this->expenses()->exists();
+    }
+
+    /**
+     * @return HasMany<Expense, $this>
+     */
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(Expense::class);
     }
 
     public function getInUseAttribute(): bool

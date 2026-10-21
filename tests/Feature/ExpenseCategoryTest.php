@@ -2,11 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\ExpenseCategorySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -37,7 +37,7 @@ class ExpenseCategoryTest extends TestCase
 
     public function test_database_seeder_creates_categories_even_without_model_events(): void
     {
-        $this->seed(\Database\Seeders\DatabaseSeeder::class);
+        $this->seed(DatabaseSeeder::class);
 
         $this->assertSame(17, ExpenseCategory::count());
         $this->assertNotNull(ExpenseCategory::first()->slug);
@@ -151,11 +151,7 @@ class ExpenseCategoryTest extends TestCase
     {
         $category = ExpenseCategory::factory()->create();
 
-        Schema::create('expenses', function ($table) {
-            $table->id();
-            $table->unsignedBigInteger('expense_category_id');
-        });
-        DB::table('expenses')->insert(['expense_category_id' => $category->id]);
+        Expense::factory()->create(['expense_category_id' => $category->id]);
 
         $this->delete("/categories/{$category->id}")
             ->assertRedirect('/categories')
