@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OccurrenceStatus;
 use App\Enums\PaymentMethod;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -58,6 +59,22 @@ class Expense extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        // Excluir uma despesa gerada por recorrência reabre a ocorrência como previsão,
+        // para não deixar uma ocorrência "paga" sem despesa correspondente.
+        static::deleting(function (Expense $expense): void {
+            RecurringExpenseOccurrence::query()
+                ->where('expense_id', $expense->getKey())
+                ->update([
+                    'status' => OccurrenceStatus::Forecast,
+                    'paid_at' => null,
+                    'paid_amount_cents' => null,
+                    'expense_id' => null,
+                ]);
+        });
+    }
+
     /**
      * @return BelongsTo<Vehicle, $this>
      */
@@ -72,6 +89,14 @@ class Expense extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(ExpenseCategory::class, 'expense_category_id');
+    }
+
+    /**
+     * @return BelongsTo<RecurringExpense, $this>
+     */
+    public function recurringExpense(): BelongsTo
+    {
+        return $this->belongsTo(RecurringExpense::class);
     }
 
     public function getHasReceiptAttribute(): bool
