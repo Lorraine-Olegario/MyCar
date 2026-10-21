@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Reporting\Period;
 use App\Domain\Reporting\VehicleFinancialOverview;
+use App\Domain\Reporting\VehicleHistory;
 use App\Domain\Vehicles\VehiclePhotoStorage;
 use App\Enums\FuelType;
 use App\Enums\VehicleCategory;
@@ -77,13 +79,29 @@ class VehicleController extends Controller
     /**
      * Exibe um veículo.
      */
-    public function show(Request $request, Vehicle $vehicle, VehicleFinancialOverview $financial): Response
+    public function show(Request $request, Vehicle $vehicle, VehicleFinancialOverview $financial, VehicleHistory $history): Response
     {
+        // `financial` e `history` são calculados só quando pedidos (cargas parciais ao trocar de aba).
         return Inertia::render('Vehicles/Show', [
             'vehicle' => $vehicle,
-            'financial' => $financial->build($vehicle, $request->query()),
+            'financial' => fn () => $financial->build($vehicle, $request->query()),
+            'history' => fn () => $history->build(
+                $vehicle,
+                $request->query(),
+                $this->selectedPeriod($financial->build($vehicle, $request->query())['selection']),
+            ),
             'options' => $this->options(),
         ]);
+    }
+
+    /**
+     * @param  array{year: int, month: ?int}  $selection
+     */
+    private function selectedPeriod(array $selection): Period
+    {
+        return $selection['month'] !== null
+            ? Period::ofMonth($selection['year'], $selection['month'])
+            : Period::ofYear($selection['year']);
     }
 
     /**
