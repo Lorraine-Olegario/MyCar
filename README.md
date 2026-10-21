@@ -2,8 +2,14 @@
 
 Aplicação base com **Laravel 13**, **Vue 3**, **Vite 8** e **SQLite**.
 
-O projeto contém apenas a estrutura inicial: uma rota, uma view Blade e um
-componente Vue de exemplo. Nenhuma funcionalidade de negócio foi implementada.
+Aplicação pessoal para acompanhar **veículos, despesas, abastecimentos e
+indicadores financeiros**. O projeto está na **Fase 1 (Fundação)**: Laravel +
+Inertia.js + Vue 3 integrados, layout base com navegação, utilitários de
+formatação brasileira e componentes de UI reutilizáveis. Nenhuma funcionalidade
+de negócio foi implementada ainda.
+
+As convenções de código (centavos, datas, enums, domínio, testes e UI) estão em
+[`docs/arquitetura.md`](docs/arquitetura.md).
 
 ## Stack
 
@@ -98,6 +104,12 @@ composer test
 
 Os testes usam SQLite em memória (`:memory:`), então não afetam o banco local.
 
+Para os utilitários de formatação/conversão (Vitest):
+
+```sh
+npm test
+```
+
 ## Banco de dados
 
 - Arquivo: `database/database.sqlite`
@@ -107,21 +119,25 @@ Os testes usam SQLite em memória (`:memory:`), então não afetam o banco local
 ## Estrutura
 
 ```
-app/                              # código PHP da aplicação
+app/Http/Middleware/HandleInertiaRequests.php  # props compartilhadas do Inertia
 resources/
   css/app.css                     # entrada do Tailwind CSS
-  js/app.js                       # entrypoint: cria e monta o app Vue
-  js/App.vue                      # componente raiz
-  js/components/ExampleComponent.vue  # componente de exemplo (estado local)
-  views/app.blade.php             # shell HTML com @vite e ponto de montagem
-routes/web.php                    # rota "/" -> view('app')
+  js/app.js                       # entrypoint: createInertiaApp + layout padrão
+  js/layouts/AppLayout.vue        # layout base: sidebar, cabeçalho e drawer
+  js/pages/                       # páginas Inertia (Dashboard, Vehicles, ...)
+  js/components/ui/               # componentes base de UI
+  js/utils/format.js              # formatação brasileira (moeda, data, km)
+  views/app.blade.php             # template raiz com @inertia e @vite
+routes/web.php                    # rotas nomeadas das seções
 database/migrations/              # migrations iniciais (users, cache, jobs)
-tests/Feature/HomePageTest.php    # teste da rota inicial
+tests/Feature/NavigationTest.php  # testes das rotas e da 404 Inertia
 vite.config.js                    # Laravel + Vue + Tailwind
+vitest.config.js                  # Vitest (utilitários de formatação)
 ```
 
-O Blade passa o nome da aplicação para o Vue via `data-app-name`, e o
-`app.js` o repassa como prop para o componente raiz.
+O `HandleInertiaRequests` compartilha o `appName` e as flash messages com as
+páginas; o `app.js` resolve as páginas em `resources/js/pages` e aplica o
+`AppLayout` como layout padrão.
 
 ## Arquivos locais não versionados
 
