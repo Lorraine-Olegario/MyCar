@@ -37,6 +37,11 @@ class StoreExpenseRequest extends FormRequest
                     if ($category && ! $category->active && $expense?->expense_category_id !== $category->id) {
                         $fail('A categoria selecionada está inativa.');
                     }
+
+                    // Despesa de uma manutenção precisa continuar em uma categoria de manutenção.
+                    if ($category && $expense?->maintenance()->exists() && ! in_array($category->slug, ExpenseCategory::MAINTENANCE_SLUGS, true)) {
+                        $fail('Esta despesa pertence a uma manutenção; use uma categoria de manutenção.');
+                    }
                 },
             ],
             'description' => ['required', 'string', 'max:255'],

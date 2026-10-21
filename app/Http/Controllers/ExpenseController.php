@@ -126,6 +126,10 @@ class ExpenseController extends Controller
      */
     public function destroy(Expense $expense, ExpenseReceiptStorage $receipts): RedirectResponse
     {
+        if ($expense->maintenance()->exists()) {
+            return to_route('expenses.index')->with('error', 'Esta despesa pertence a uma manutenção. Exclua-a pela página de manutenções.');
+        }
+
         $receipts->forget($expense);
         $expense->delete();
 
