@@ -20,11 +20,16 @@ Route::get('vehicles/{vehicle}/photo', [VehicleController::class, 'photo'])
     ->name('vehicles.photo')
     ->withTrashed();
 Route::prefix('vehicles/{vehicle}/fipe')->name('vehicles.fipe.')->group(function () {
-    Route::get('brands', [VehicleFipeController::class, 'brands'])->name('brands');
-    Route::get('models', [VehicleFipeController::class, 'models'])->name('models');
-    Route::get('years', [VehicleFipeController::class, 'years'])->name('years');
-    Route::post('/', [VehicleFipeController::class, 'store'])->name('store');
-    Route::post('refresh', [VehicleFipeController::class, 'refresh'])->name('refresh');
+    Route::middleware('throttle:fipe-catalog')->group(function () {
+        Route::get('brands', [VehicleFipeController::class, 'brands'])->name('brands');
+        Route::get('models', [VehicleFipeController::class, 'models'])->name('models');
+        Route::get('years', [VehicleFipeController::class, 'years'])->name('years');
+    });
+
+    Route::middleware('throttle:fipe-quote')->group(function () {
+        Route::post('/', [VehicleFipeController::class, 'store'])->name('store');
+        Route::post('refresh', [VehicleFipeController::class, 'refresh'])->name('refresh');
+    });
 });
 Route::patch('vehicles/{vehicle}/restore', [VehicleController::class, 'restore'])
     ->name('vehicles.restore')
