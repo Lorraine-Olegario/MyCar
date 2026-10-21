@@ -3,11 +3,16 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 import ConfirmDialog from '../../components/ui/ConfirmDialog.vue';
+import VehicleFinancial from '../../components/vehicle/VehicleFinancial.vue';
 import { formatCurrency, formatDate, formatKm } from '../../utils/format';
 import { optionLabel } from '../../utils/options';
 
 const props = defineProps({
     vehicle: {
+        type: Object,
+        required: true,
+    },
+    financial: {
         type: Object,
         required: true,
     },
@@ -137,6 +142,10 @@ const confirmArchive = () => {
                     <span class="text-sm text-slate-400">
                         {{ vehicle.formatted_plate ?? 'Sem placa' }}
                     </span>
+
+                    <span v-if="vehicle.ownership_label" class="text-sm text-slate-400">
+                        Propriedade: {{ vehicle.ownership_label }}
+                    </span>
                 </div>
             </div>
 
@@ -255,6 +264,8 @@ const confirmArchive = () => {
                 </dl>
             </section>
         </div>
+
+        <VehicleFinancial :vehicle="vehicle" :financial="financial" />
 
         <section class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
             <h2 class="text-sm font-semibold uppercase tracking-widest text-indigo-400">

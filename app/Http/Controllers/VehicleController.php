@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Reporting\VehicleFinancialOverview;
 use App\Domain\Vehicles\VehiclePhotoStorage;
 use App\Enums\FuelType;
 use App\Enums\VehicleCategory;
@@ -76,10 +77,11 @@ class VehicleController extends Controller
     /**
      * Exibe um veículo.
      */
-    public function show(Vehicle $vehicle): Response
+    public function show(Request $request, Vehicle $vehicle, VehicleFinancialOverview $financial): Response
     {
         return Inertia::render('Vehicles/Show', [
             'vehicle' => $vehicle,
+            'financial' => $financial->build($vehicle, $request->query()),
             'options' => $this->options(),
         ]);
     }
