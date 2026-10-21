@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\RecurringExpenseController;
 use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -19,6 +20,11 @@ Route::patch('vehicles/{vehicle}/restore', [VehicleController::class, 'restore']
 
 Route::resource('expenses', ExpenseController::class)->only(['index', 'store', 'update', 'destroy']);
 Route::get('expenses/{expense}/receipt', [ExpenseController::class, 'receipt'])->name('expenses.receipt');
+Route::resource('recurring', RecurringExpenseController::class)
+    ->only(['index', 'store', 'update'])
+    ->parameters(['recurring' => 'recurring']);
+Route::post('recurring/occurrences/{occurrence}/pay', [RecurringExpenseController::class, 'pay'])->name('recurring.occurrences.pay');
+Route::patch('recurring/occurrences/{occurrence}/cancel', [RecurringExpenseController::class, 'cancel'])->name('recurring.occurrences.cancel');
 Route::get('/fuelings', fn () => Inertia::render('Fuelings/Index'))->name('fuelings.index');
 Route::get('/reports', fn () => Inertia::render('Reports/Index'))->name('reports.index');
 Route::resource('categories', ExpenseCategoryController::class)

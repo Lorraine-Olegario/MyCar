@@ -27,6 +27,7 @@ class NavigationTest extends TestCase
             'dashboard' => ['/', 'Dashboard'],
             'vehicles' => ['/vehicles', 'Vehicles/Index'],
             'expenses' => ['/expenses', 'Expenses/Index'],
+            'recurring' => ['/recurring', 'Recurring/Index'],
             'fuelings' => ['/fuelings', 'Fuelings/Index'],
             'reports' => ['/reports', 'Reports/Index'],
             'categories' => ['/categories', 'Categories/Index'],
