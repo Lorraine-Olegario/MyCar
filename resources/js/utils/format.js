@@ -95,6 +95,37 @@ export function formatKm(value) {
 }
 
 /**
+ * Converte uma data digitada em dd/mm/aaaa para o formato do banco (YYYY-MM-DD).
+ * Devolve string vazia quando a entrada está incompleta ou é uma data inexistente.
+ */
+export function parseDateInput(value) {
+    if (value === null || value === undefined || value === '') {
+        return '';
+    }
+
+    const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(String(value).trim());
+
+    if (!match) {
+        return '';
+    }
+
+    const [, day, month, year] = match;
+    const date = toLocalDate(year, month, day);
+
+    // O construtor de Date "corrige" datas inexistentes (31/02 vira 03/03),
+    // então a comparação é o que garante que a data existe de fato.
+    if (
+        date.getFullYear() !== Number(year) ||
+        date.getMonth() + 1 !== Number(month) ||
+        date.getDate() !== Number(day)
+    ) {
+        return '';
+    }
+
+    return `${year}-${month}-${day}`;
+}
+
+/**
  * Converte uma entrada de moeda digitada (ex.: "R$ 1.234,56") em centavos (123456).
  */
 export function parseCurrencyInput(value) {
