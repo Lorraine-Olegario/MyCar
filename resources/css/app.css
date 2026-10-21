@@ -3,6 +3,48 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+/*
+ * Tema claro do MyCar. As escalas `slate` (neutros), `indigo` (cor de destaque,
+ * laranja) e `rose`/`emerald` (estados) são remapeadas aqui, de modo que os
+ * componentes continuam usando as mesmas classes e o visual muda num único lugar.
+ * Convenção: slate-950 = fundo da página, slate-900 = cartões, slate-800/700 =
+ * bordas, slate-100 = texto principal, slate-500 = texto secundário.
+ */
 @theme {
-    --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+
+    --color-slate-950: #f3f2ee;
+    --color-slate-900: #ffffff;
+    --color-slate-800: #e7e5de;
+    --color-slate-700: #d6d3ca;
+    --color-slate-600: #b5b2a8;
+    --color-slate-500: #6f6d66;
+    --color-slate-400: #5f5d57;
+    --color-slate-300: #45443f;
+    --color-slate-200: #2b2a27;
+    --color-slate-100: #15161a;
+
+    --color-indigo-950: #fff1e8;
+    --color-indigo-800: #fdba8c;
+    --color-indigo-500: #c2410c;
+    --color-indigo-400: #d9531a;
+    --color-indigo-300: #b43a0a;
+    --color-indigo-200: #9a3412;
+
+    --color-rose-950: #fef2f2;
+    --color-rose-900: #fecaca;
+    --color-rose-800: #fca5a5;
+    --color-rose-600: #dc2626;
+    --color-rose-500: #ef4444;
+    --color-rose-400: #dc2626;
+    --color-rose-300: #b91c1c;
+    --color-rose-200: #991b1b;
+
+    --color-emerald-800: #a7f3d0;
+    --color-emerald-300: #047857;
+    --color-emerald-200: #065f46;
+
+    --color-sidebar: #15161a;
+    --color-sidebar-hover: #23252c;
 }

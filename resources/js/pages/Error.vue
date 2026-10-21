@@ -18,7 +18,7 @@ defineProps({
         <p class="text-sm font-semibold uppercase tracking-widest text-indigo-400">
             {{ status }}
         </p>
-        <h1 class="mt-3 text-2xl font-semibold tracking-tight text-white">
+        <h1 class="mt-3 text-2xl font-semibold tracking-tight text-slate-100">
             Página não encontrada
         </h1>
         <p class="mt-2 text-sm leading-relaxed text-slate-400">
