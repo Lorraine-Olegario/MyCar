@@ -1,11 +1,16 @@
 <?php
 
+use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', fn () => Inertia::render('Dashboard'))->name('dashboard');
 
-Route::get('/vehicles', fn () => Inertia::render('Vehicles/Index'))->name('vehicles.index');
+Route::resource('vehicles', VehicleController::class)->except(['create', 'edit']);
+Route::patch('vehicles/{vehicle}/restore', [VehicleController::class, 'restore'])
+    ->name('vehicles.restore')
+    ->withTrashed();
+
 Route::get('/expenses', fn () => Inertia::render('Expenses/Index'))->name('expenses.index');
 Route::get('/fuelings', fn () => Inertia::render('Fuelings/Index'))->name('fuelings.index');
 Route::get('/reports', fn () => Inertia::render('Reports/Index'))->name('reports.index');
