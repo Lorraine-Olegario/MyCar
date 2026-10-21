@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
+import FlashMessages from '../components/ui/FlashMessages.vue';
 
 const page = usePage();
 
@@ -120,6 +121,7 @@ watch(currentPath, () => {
                 </header>
 
                 <main id="main-content" tabindex="-1" class="flex-1 px-4 py-6 focus:outline-none sm:px-6 lg:px-8">
+                    <FlashMessages class="mb-6" />
                     <slot />
                 </main>
             </div>
