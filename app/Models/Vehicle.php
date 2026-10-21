@@ -49,6 +49,18 @@ class Vehicle extends Model
     protected $appends = [
         'full_name',
         'formatted_plate',
+        'archived',
+        'photo_url',
+        'sale_result_cents',
+    ];
+
+    /**
+     * O caminho no disco privado não vai para a interface; ela usa `photo_url`.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'photo_path',
     ];
 
     /**
@@ -117,6 +129,41 @@ class Vehicle extends Model
 
                 return $plate;
             },
+        );
+    }
+
+    /**
+     * Indica se o veículo está arquivado (soft delete).
+     */
+    protected function archived(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): bool => $this->trashed(),
+        );
+    }
+
+    /**
+     * URL da rota controlada que serve a foto do veículo; nula quando não há foto.
+     */
+    protected function photoUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): ?string => filled($this->photo_path)
+                ? route('vehicles.photo', $this)
+                : null,
+        );
+    }
+
+    /**
+     * Resultado da venda (venda - compra) em centavos; nulo quando falta o valor
+     * de compra ou de venda. As despesas operacionais entram na Fase 4.
+     */
+    protected function saleResultCents(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): ?int => $this->purchase_price_cents === null || $this->sale_price_cents === null
+                ? null
+                : $this->sale_price_cents - $this->purchase_price_cents,
         );
     }
 
