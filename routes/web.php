@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -18,7 +19,10 @@ Route::patch('vehicles/{vehicle}/restore', [VehicleController::class, 'restore']
 Route::get('/expenses', fn () => Inertia::render('Expenses/Index'))->name('expenses.index');
 Route::get('/fuelings', fn () => Inertia::render('Fuelings/Index'))->name('fuelings.index');
 Route::get('/reports', fn () => Inertia::render('Reports/Index'))->name('reports.index');
-Route::get('/categories', fn () => Inertia::render('Categories/Index'))->name('categories.index');
+Route::resource('categories', ExpenseCategoryController::class)
+    ->only(['index', 'store', 'update', 'destroy']);
+Route::patch('categories/{category}/toggle', [ExpenseCategoryController::class, 'toggle'])->name('categories.toggle');
+Route::patch('categories/{category}/move', [ExpenseCategoryController::class, 'move'])->name('categories.move');
 
 Route::fallback(fn () => Inertia::render('Error', ['status' => 404])
     ->toResponse(request())

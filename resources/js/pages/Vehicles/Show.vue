@@ -161,6 +161,20 @@ const confirmArchive = () => {
             </div>
         </div>
 
+        <p
+            v-if="vehicle.status === 'sold'"
+            role="status"
+            class="rounded-2xl border border-indigo-800 bg-indigo-950 px-5 py-4 text-sm leading-relaxed text-indigo-200"
+        >
+            Este veículo foi vendido<template v-if="vehicle.sale_date"> em {{ formatDate(vehicle.sale_date) }}</template>
+            e não conta como ativo.
+            <template v-if="vehicle.ownership_label">
+                Período de propriedade: {{ vehicle.ownership_label }}
+                (de {{ formatDate(vehicle.acquisition_date) }}<template v-if="vehicle.sale_date"> até {{ formatDate(vehicle.sale_date) }}</template>).
+            </template>
+            Todo o histórico continua disponível.
+        </p>
+
         <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
             <div class="self-start overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/40">
                 <div class="aspect-[4/3] w-full bg-slate-900">

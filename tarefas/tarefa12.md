@@ -18,3 +18,14 @@
   - Validação: `php artisan migrate:fresh --seed` e testes de feature/unitários.
 
 **Execução:** implemente somente este item; um item = uma branch = um commit. Rode as validações indicadas. Não avance para a próxima tarefa sem orientação.
+
+---
+
+## Realizado
+
+### Item 1 — Categorias de despesas
+- Branch: `tarefa12/1-categorias-despesas`
+- Commit: `a07487b`
+- O que foi feito: Migration `expense_categories`, model/factory, `ExpenseCategorySeeder` com as 17 categorias (idempotente, não sobrescreve ajustes do usuário), `ExpenseCategoryController` (criar, editar, ativar/desativar, mover para cima/baixo, excluir só sem uso), validação de nome único sem diferenciar maiúsculas, página Categories/Index.vue. DatabaseSeeder passou a chamar o seeder e a criar o usuário de teste de forma idempotente.
+- Validação: `php artisan test` (89 testes) ok; `migrate:fresh --seed` seguido de `db:seed` mantém 17 categorias; `npm run build` ok.
+- Observações: O vínculo com despesas ainda não existe: `ExpenseCategory::isInUse()` consulta a tabela `expenses` somente se ela existir (a tarefa 13 a cria) e é coberto em teste com tabela temporária. Reordenação por botões ↑/↓ (acessível, sem drag-and-drop). O slug é informado explicitamente no seeder porque o DatabaseSeeder usa WithoutModelEvents.

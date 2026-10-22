@@ -8,7 +8,7 @@ import BaseSelect from '../../components/ui/BaseSelect.vue';
 import ConfirmDialog from '../../components/ui/ConfirmDialog.vue';
 import EmptyState from '../../components/ui/EmptyState.vue';
 import LoadingState from '../../components/ui/LoadingState.vue';
-import { formatKm } from '../../utils/format';
+import { formatDate, formatKm } from '../../utils/format';
 import { optionLabel } from '../../utils/options';
 
 const props = defineProps({
@@ -20,6 +20,10 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    counts: {
+        type: Object,
+        default: () => ({ active: 0, sold: 0, archived: 0 }),
+    },
     options: {
         type: Object,
         default: () => ({ statuses: [], categories: [], fuels: [] }),
@@ -28,20 +32,32 @@ const props = defineProps({
 
 const form = reactive({
     search: props.filters.search ?? '',
-    status: props.filters.status ?? '',
+    view: props.filters.view ?? '',
     category: props.filters.category ?? '',
-    archived: Boolean(props.filters.archived),
 });
+
+const views = computed(() => [
+    { value: '', label: 'Ativos e vendidos', count: props.counts.active + props.counts.sold },
+    { value: 'active', label: 'Ativos', count: props.counts.active },
+    { value: 'sold', label: 'Vendidos', count: props.counts.sold },
+    { value: 'archived', label: 'Arquivados', count: props.counts.archived },
+]);
+
+const currentView = computed(() => views.value.find((view) => view.value === form.view));
+
+const viewDescription = {
+    '': 'Exibindo veículos ativos e vendidos. Arquivados ficam fora desta lista.',
+    active: 'Exibindo somente veículos que ainda são seus.',
+    sold: 'Exibindo o histórico de veículos vendidos, com o período em que foram seus.',
+    archived: 'Exibindo somente veículos arquivados. Restaure para voltar à lista padrão.',
+};
 
 const loading = ref(false);
 const photoFailed = reactive({});
 const vehicleToArchive = ref(null);
+const vehicleToRestore = ref(null);
+const restoring = ref(false);
 const archiving = ref(false);
-
-const statusOptions = computed(() => [
-    { value: '', label: 'Todos os status' },
-    ...props.options.statuses,
-]);
 
 const categoryOptions = computed(() => [
     { value: '', label: 'Todas as categorias' },
@@ -51,9 +67,8 @@ const categoryOptions = computed(() => [
 const hasFilters = computed(
     () =>
         form.search.trim() !== '' ||
-        form.status !== '' ||
-        form.category !== '' ||
-        form.archived,
+        form.view !== '' ||
+        form.category !== '',
 );
 
 const statusClass = {
@@ -68,16 +83,12 @@ const query = () => {
         params.search = form.search.trim();
     }
 
-    if (form.status !== '') {
-        params.status = form.status;
+    if (form.view !== '') {
+        params.view = form.view;
     }
 
     if (form.category !== '') {
         params.category = form.category;
-    }
-
-    if (form.archived) {
-        params.archived = 1;
     }
 
     return params;
@@ -97,8 +108,8 @@ const applyFilters = () => {
     });
 };
 
-const onStatusChange = (value) => {
-    form.status = value;
+const selectView = (value) => {
+    form.view = value;
     applyFilters();
 };
 
@@ -109,9 +120,8 @@ const onCategoryChange = (value) => {
 
 const clearFilters = () => {
     form.search = '';
-    form.status = '';
+    form.view = '';
     form.category = '';
-    form.archived = false;
     applyFilters();
 };
 
@@ -131,8 +141,20 @@ const confirmArchive = () => {
     });
 };
 
-const restore = (vehicle) => {
-    router.patch(`/vehicles/${vehicle.id}/restore`, {}, { preserveScroll: true });
+const confirmRestore = () => {
+    if (vehicleToRestore.value === null) {
+        return;
+    }
+
+    restoring.value = true;
+
+    router.patch(`/vehicles/${vehicleToRestore.value.id}/restore`, {}, {
+        preserveScroll: true,
+        onFinish: () => {
+            restoring.value = false;
+            vehicleToRestore.value = null;
+        },
+    });
 };
 </script>
 
@@ -156,23 +178,43 @@ const restore = (vehicle) => {
             </Link>
         </div>
 
+        <nav aria-label="Filtro de histórico de veículos">
+            <ul class="flex flex-wrap gap-2">
+                <li v-for="view in views" :key="view.value">
+                    <button
+                        type="button"
+                        :aria-pressed="form.view === view.value"
+                        class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+                        :class="
+                            form.view === view.value
+                                ? 'border-indigo-500 bg-indigo-500 text-white'
+                                : 'border-slate-700 bg-slate-900 text-slate-300 hover:bg-slate-800'
+                        "
+                        @click="selectView(view.value)"
+                    >
+                        {{ view.label }}
+                        <span
+                            class="rounded-full px-2 py-0.5 text-xs"
+                            :class="form.view === view.value ? 'bg-white/20' : 'bg-slate-800 text-slate-400'"
+                        >
+                            {{ view.count }}
+                        </span>
+                    </button>
+                </li>
+            </ul>
+            <p class="mt-3 text-sm text-slate-500" role="status">{{ viewDescription[form.view] }}</p>
+        </nav>
+
         <form
             class="rounded-2xl border border-slate-800 bg-slate-900/40 p-5"
             @submit.prevent="applyFilters"
         >
-            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div class="grid gap-4 md:grid-cols-2">
                 <BaseInput
                     v-model="form.search"
                     label="Busca"
                     hint="Nome, marca, modelo ou placa"
                     placeholder="Ex.: Onix"
-                />
-
-                <BaseSelect
-                    :model-value="form.status"
-                    label="Status"
-                    :options="statusOptions"
-                    @update:model-value="onStatusChange"
                 />
 
                 <BaseSelect
@@ -182,18 +224,6 @@ const restore = (vehicle) => {
                     @update:model-value="onCategoryChange"
                 />
 
-                <div class="flex flex-col justify-end gap-3">
-                    <label class="flex items-center gap-2 text-sm text-slate-300" for="vehicles-archived">
-                        <input
-                            id="vehicles-archived"
-                            v-model="form.archived"
-                            type="checkbox"
-                            class="h-4 w-4 rounded border-slate-600 bg-slate-900 text-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
-                            @change="applyFilters"
-                        >
-                        Somente arquivados
-                    </label>
-                </div>
             </div>
 
             <div class="mt-4 flex flex-wrap gap-3">
@@ -241,6 +271,7 @@ const restore = (vehicle) => {
                 <p class="text-sm text-slate-400">
                     Mostrando {{ vehicles.from }}–{{ vehicles.to }} de {{ vehicles.total }}
                     {{ vehicles.total === 1 ? 'veículo' : 'veículos' }}
+                    <span v-if="currentView">· {{ currentView.label.toLowerCase() }}</span>
                 </p>
 
                 <ul class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
@@ -293,6 +324,16 @@ const restore = (vehicle) => {
                                     </span>
                                 </div>
 
+                                <p
+                                    v-if="vehicle.status === 'sold'"
+                                    class="rounded-lg bg-indigo-950 px-3 py-2 text-xs leading-relaxed text-indigo-200"
+                                >
+                                    Vendido<template v-if="vehicle.sale_date"> em {{ formatDate(vehicle.sale_date) }}</template>.
+                                    <template v-if="vehicle.ownership_label">
+                                        Ficou com você por {{ vehicle.ownership_label }}.
+                                    </template>
+                                </p>
+
                                 <dl class="grid grid-cols-2 gap-3">
                                     <div>
                                         <dt class="text-xs uppercase tracking-wide text-slate-500">
@@ -333,7 +374,7 @@ const restore = (vehicle) => {
                                         v-else
                                         variant="secondary"
                                         size="sm"
-                                        @click="restore(vehicle)"
+                                        @click="vehicleToRestore = vehicle"
                                     >
                                         Restaurar
                                     </BaseButton>
@@ -360,6 +401,16 @@ const restore = (vehicle) => {
                 />
             </template>
         </template>
+
+        <ConfirmDialog
+            :show="vehicleToRestore !== null"
+            title="Restaurar veículo"
+            :message="`O veículo ${vehicleToRestore?.full_name ?? ''} voltará para a lista de ativos e vendidos, com todo o histórico preservado.`"
+            confirm-label="Restaurar"
+            :processing="restoring"
+            @confirm="confirmRestore"
+            @cancel="vehicleToRestore = null"
+        />
 
         <ConfirmDialog
             :show="vehicleToArchive !== null"

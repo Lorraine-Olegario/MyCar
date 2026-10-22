@@ -52,6 +52,7 @@ class Vehicle extends Model
         'archived',
         'photo_url',
         'sale_result_cents',
+        'ownership_label',
     ];
 
     /**
@@ -164,6 +165,38 @@ class Vehicle extends Model
             get: fn (): ?int => $this->purchase_price_cents === null || $this->sale_price_cents === null
                 ? null
                 : $this->sale_price_cents - $this->purchase_price_cents,
+        );
+    }
+
+    /**
+     * Período de propriedade em texto (ex.: "2 anos e 3 meses"): da aquisição até a
+     * venda ou, para veículos ativos, até hoje. Nulo sem data de aquisição.
+     */
+    protected function ownershipLabel(): Attribute
+    {
+        return Attribute::make(
+            get: function (): ?string {
+                if ($this->acquisition_date === null) {
+                    return null;
+                }
+
+                $end = $this->sale_date ?? now();
+                $months = max(0, (int) $this->acquisition_date->diffInMonths($end));
+
+                if ($months < 1) {
+                    return 'menos de 1 mês';
+                }
+
+                $years = intdiv($months, 12);
+                $rest = $months % 12;
+
+                $parts = array_filter([
+                    $years > 0 ? $years.($years === 1 ? ' ano' : ' anos') : null,
+                    $rest > 0 ? $rest.($rest === 1 ? ' mês' : ' meses') : null,
+                ]);
+
+                return implode(' e ', $parts);
+            },
         );
     }
 
