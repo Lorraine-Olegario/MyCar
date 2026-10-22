@@ -34,7 +34,7 @@ const emit = defineEmits(['confirm', 'cancel']);
 
 <template>
     <BaseModal :show="show" labelled-by="confirm-dialog-title" @close="emit('cancel')">
-        <h2 id="confirm-dialog-title" class="text-lg font-semibold text-white">
+        <h2 id="confirm-dialog-title" class="text-lg font-semibold text-slate-100">
             {{ title }}
         </h2>
 

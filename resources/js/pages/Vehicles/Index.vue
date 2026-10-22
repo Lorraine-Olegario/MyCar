@@ -142,7 +142,7 @@ const restore = (vehicle) => {
     <div class="space-y-6">
         <div class="flex flex-wrap items-end justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-semibold tracking-tight text-white">Veículos</h1>
+                <h1 class="text-2xl font-semibold tracking-tight text-slate-100">Veículos</h1>
                 <p class="mt-1 max-w-prose text-sm text-slate-400">
                     Cadastro, fotos e histórico de veículos ativos, vendidos e arquivados.
                 </p>
@@ -271,7 +271,7 @@ const restore = (vehicle) => {
                                         <Link
                                             v-if="!vehicle.archived"
                                             :href="`/vehicles/${vehicle.id}`"
-                                            class="block truncate text-base font-medium text-white transition hover:text-indigo-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+                                            class="block truncate text-base font-medium text-slate-100 transition hover:text-indigo-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
                                         >
                                             {{ vehicle.full_name }}
                                         </Link>

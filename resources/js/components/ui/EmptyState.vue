@@ -29,7 +29,7 @@ defineProps({
 
         <component
             :is="headingLevel"
-            class="mt-3 text-2xl font-semibold tracking-tight text-white"
+            class="mt-3 text-2xl font-semibold tracking-tight text-slate-100"
         >
             {{ title }}
         </component>

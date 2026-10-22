@@ -122,7 +122,7 @@ const confirmArchive = () => {
                 <p class="text-xs font-semibold uppercase tracking-widest text-indigo-400">
                     Veículo
                 </p>
-                <h1 class="mt-2 text-2xl font-semibold tracking-tight text-white">
+                <h1 class="mt-2 text-2xl font-semibold tracking-tight text-slate-100">
                     {{ vehicle.full_name }}
                 </h1>
 
@@ -270,7 +270,7 @@ const confirmArchive = () => {
                     class="rounded-lg px-3 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
                     :class="
                         activeTab === tab.id
-                            ? 'bg-slate-800 text-white'
+                            ? 'bg-slate-800 text-slate-100'
                             : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
                     "
                     @click="activeTab = tab.id"

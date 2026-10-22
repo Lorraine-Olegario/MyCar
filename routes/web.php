@@ -1,10 +1,11 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', fn () => Inertia::render('Dashboard'))->name('dashboard');
+Route::get('/', DashboardController::class)->name('dashboard');
 
 Route::resource('vehicles', VehicleController::class);
 Route::get('vehicles/{vehicle}/photo', [VehicleController::class, 'photo'])

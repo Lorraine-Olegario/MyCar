@@ -36,7 +36,7 @@ const decode = (value) =>
                 class="rounded-lg px-3 py-1.5 text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
                 :class="
                     link.active
-                        ? 'bg-indigo-500/15 font-medium text-white'
+                        ? 'bg-indigo-500/15 font-medium text-slate-100'
                         : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
                 "
                 :aria-current="link.active ? 'page' : undefined"

@@ -186,7 +186,7 @@ const submit = () => {
                 <p class="text-xs font-semibold uppercase tracking-widest text-indigo-400">
                     Veículos
                 </p>
-                <h1 class="mt-2 text-2xl font-semibold tracking-tight text-white">
+                <h1 class="mt-2 text-2xl font-semibold tracking-tight text-slate-100">
                     {{ isEditing ? 'Editar veículo' : 'Novo veículo' }}
                 </h1>
                 <p class="mt-1 max-w-prose text-sm text-slate-400">
