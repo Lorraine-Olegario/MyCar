@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Domain\Expenses\ExpenseReceiptStorage;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use App\Models\RecurringExpense;
 use App\Models\Vehicle;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -46,14 +47,15 @@ class ExpensePagesTest extends TestCase
     public function test_expense_rows_carry_recurrence_and_tracking_information(): void
     {
         $vehicle = Vehicle::factory()->create(['tracking_start_date' => '2024-05-01']);
+        $recurring = RecurringExpense::factory()->create(['vehicle_id' => $vehicle->id]);
         Expense::factory()->create([
             'vehicle_id' => $vehicle->id,
             'occurred_on' => '2023-12-10',
-            'recurring_expense_id' => 7,
+            'recurring_expense_id' => $recurring->id,
         ]);
 
         $this->get('/expenses')->assertInertia(fn (Assert $page) => $page
-            ->where('expenses.data.0.recurring_expense_id', 7)
+            ->where('expenses.data.0.recurring_expense_id', $recurring->id)
             ->where('expenses.data.0.occurred_on', '2023-12-10')
             ->where('expenses.data.0.vehicle.name', $vehicle->name)
             ->has('expenses.data.0.vehicle.tracking_start_date')
