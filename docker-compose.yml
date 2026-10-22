@@ -1,0 +1,19 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /data/database.sqlite
+      PHP_CLI_SERVER_WORKERS: 4
+    volumes:
+      - mycar-data:/data
+      - mycar-storage:/var/www/html/storage/app
+
+volumes:
+  mycar-data:
+  mycar-storage:

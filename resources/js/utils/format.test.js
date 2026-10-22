@@ -5,6 +5,7 @@ import {
     formatKm,
     formatMonthYear,
     parseCurrencyInput,
+    parseDateInput,
 } from './format';
 
 describe('formatCurrency', () => {
@@ -80,5 +81,25 @@ describe('parseCurrencyInput', () => {
     it('devolve 0 para entradas vazias ou inválidas', () => {
         expect(parseCurrencyInput('')).toBe(0);
         expect(parseCurrencyInput('abc')).toBe(0);
+    });
+});
+
+describe('parseDateInput', () => {
+    it('converte dd/mm/aaaa para o formato do banco', () => {
+        expect(parseDateInput('21/10/2026')).toBe('2026-10-21');
+        expect(parseDateInput('01/01/2026')).toBe('2026-01-01');
+    });
+
+    it('devolve string vazia para entradas incompletas', () => {
+        expect(parseDateInput('21/10')).toBe('');
+        expect(parseDateInput('2')).toBe('');
+        expect(parseDateInput('')).toBe('');
+        expect(parseDateInput(null)).toBe('');
+    });
+
+    it('rejeita datas inexistentes', () => {
+        expect(parseDateInput('31/02/2026')).toBe('');
+        expect(parseDateInput('00/10/2026')).toBe('');
+        expect(parseDateInput('21/13/2026')).toBe('');
     });
 });
