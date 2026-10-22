@@ -192,4 +192,17 @@ class FipePageTest extends TestCase
             'year_id' => 'Escolha o ano/versão.',
         ]);
     }
+
+    public function test_catalog_endpoints_work_without_a_vehicle_for_the_registration_form(): void
+    {
+        Http::fake([
+            self::BASE.'/cars/brands' => Http::response([['code' => '23', 'name' => 'Chevrolet']]),
+            self::BASE.'/cars/brands/23/models' => Http::response([['code' => '5940', 'name' => 'Onix']]),
+        ]);
+
+        $this->getJson('/fipe/brands?type=cars')->assertOk()->assertJson(['data' => [['code' => '23', 'name' => 'Chevrolet']]]);
+        $this->getJson('/fipe/models?type=cars&brand=23')->assertOk()->assertJson(['data' => [['code' => '5940', 'name' => 'Onix']]]);
+        $this->getJson('/fipe/models?type=cars&brand=../x')->assertStatus(422);
+        $this->getJson('/fipe/brands?type=boats')->assertStatus(422);
+    }
 }

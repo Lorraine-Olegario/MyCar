@@ -23,15 +23,16 @@ class VehicleFipeController extends Controller
 
     /**
      * Opções do catálogo para a cascata marca → modelo → ano/versão (JSON, só leitura).
+     * Independem do veículo: também servem ao cadastro de um veículo novo.
      */
-    public function brands(Request $request, Vehicle $vehicle): JsonResponse
+    public function brands(Request $request): JsonResponse
     {
         $type = $this->type($request);
 
         return $this->catalog(fn () => $this->client->brands($type));
     }
 
-    public function models(Request $request, Vehicle $vehicle): JsonResponse
+    public function models(Request $request): JsonResponse
     {
         $type = $this->type($request);
         $brand = $request->validate(['brand' => ['required', 'string', 'max:20', 'regex:/^[A-Za-z0-9-]+$/']])['brand'];
@@ -39,7 +40,7 @@ class VehicleFipeController extends Controller
         return $this->catalog(fn () => $this->client->models($type, $brand));
     }
 
-    public function years(Request $request, Vehicle $vehicle): JsonResponse
+    public function years(Request $request): JsonResponse
     {
         $type = $this->type($request);
         $data = $request->validate([
