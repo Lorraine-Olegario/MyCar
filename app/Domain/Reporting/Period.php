@@ -71,6 +71,50 @@ final class Period
         );
     }
 
+    /**
+     * Resolve um período a partir dos presets aceitos pela interface. Valores inválidos
+     * caem nos "últimos 12 meses"; em período personalizado, datas invertidas são trocadas.
+     */
+    public static function fromPreset(string $preset, ?string $from = null, ?string $to = null, ?CarbonInterface $today = null): self
+    {
+        $today = CarbonImmutable::instance($today ?? now())->startOfDay();
+
+        return match ($preset) {
+            'this_month' => self::ofMonth($today->year, $today->month),
+            'this_year' => self::ofYear($today->year),
+            'last_year' => self::ofYear($today->year - 1),
+            'all' => self::all(),
+            'custom' => self::tryCustom($from, $to) ?? self::lastMonths(12, $today),
+            default => self::lastMonths(12, $today),
+        };
+    }
+
+    public static function tryCustom(?string $from, ?string $to): ?self
+    {
+        $parse = function (?string $value): ?CarbonImmutable {
+            if ($value === null || preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) !== 1) {
+                return null;
+            }
+
+            try {
+                $date = CarbonImmutable::createFromFormat('!Y-m-d', $value);
+            } catch (\Throwable) {
+                return null;
+            }
+
+            return $date !== false && $date->format('Y-m-d') === $value ? $date : null;
+        };
+
+        $start = $parse($from);
+        $end = $parse($to);
+
+        if ($start === null || $end === null) {
+            return null;
+        }
+
+        return $start->gt($end) ? new self($end, $start) : new self($start, $end);
+    }
+
     public function contains(CarbonInterface|string $date): bool
     {
         $date = CarbonImmutable::parse($date)->startOfDay();

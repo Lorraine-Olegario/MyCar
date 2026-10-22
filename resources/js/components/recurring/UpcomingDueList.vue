@@ -1,5 +1,5 @@
 <script setup>
-import { formatCurrency, formatDate } from '../../utils/format';
+import { formatCurrency, formatDate, formatKm } from '../../utils/format';
 
 defineProps({
     items: {
@@ -17,6 +17,12 @@ defineProps({
 });
 
 const dueText = (item) => {
+    if (item.kind === 'maintenance' && item.days_until_due == null) {
+        const km = item.km_remaining ?? 0;
+
+        return km < 0 ? `Vencida há ${formatKm(Math.abs(km))}` : `Faltam ${formatKm(km)}`;
+    }
+
     if (item.is_overdue) {
         return `Vencida há ${Math.abs(item.days_until_due)} ${Math.abs(item.days_until_due) === 1 ? 'dia' : 'dias'}`;
     }
@@ -45,12 +51,14 @@ const dueText = (item) => {
                     <p class="truncate text-sm font-semibold text-slate-100">{{ item.description }}</p>
                     <p class="text-xs text-slate-500">
                         <span v-if="showVehicle && item.vehicle_name">{{ item.vehicle_name }} · </span>
-                        {{ formatDate(item.due_date) }}
+                        <template v-if="item.due_date">{{ formatDate(item.due_date) }}</template>
+                        <template v-else-if="item.due_odometer != null">Aos {{ formatKm(item.due_odometer) }}</template>
+                        <span v-if="item.kind === 'maintenance'"> · manutenção</span>
                     </p>
                 </div>
 
                 <div class="text-right">
-                    <p class="font-mono text-sm font-bold text-slate-100">
+                    <p v-if="item.expected_amount_cents != null" class="font-mono text-sm font-bold text-slate-100">
                         {{ formatCurrency(item.expected_amount_cents) }}
                         <span class="font-sans text-xs font-normal text-slate-500">previsto</span>
                     </p>
