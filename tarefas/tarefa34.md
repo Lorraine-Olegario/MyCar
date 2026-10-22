@@ -18,3 +18,14 @@
   - Validação: checklist manual + `npm run build`.
 
 **Execução:** implemente somente este item; um item = uma branch = um commit. Rode as validações indicadas. Não avance para a próxima tarefa sem orientação.
+
+---
+
+## Realizado
+
+### Item 1 — Revisão de UX, responsividade e acessibilidade
+- Branch: `tarefa34/1-revisao-ux-acessibilidade`
+- Commit: `3d44cbd`
+- O que foi feito: Varredura de 22 telas em 360/768/1280 px (sem rolagem horizontal, campos rotulados, imagens com alt, botões/links com nome, um h1 por tela). Correções: contraste do tema (laranja de destaque 4,04→5,92, texto âmbar 3,19→5,02, rodapé da sidebar 3,49→8,52, rótulo do cartão escuro em âmbar claro) e `BaseModal` com foco preso (Tab/Shift+Tab), Esc e devolução do foco ao elemento que abriu. Checklist registrado em `docs/revisao-ux.md`.
+- Validação: `npm run build`, `npm test` (32) e `php artisan test` (326) ok. Checklist manual no navegador (Docker) com o script de auditoria em 3 larguras; foco preso/Esc/restauração do foco verificados no navegador.
+- Observações: Sem leitor de tela: a validação cobre estrutura semântica, rótulos, contraste calculado e teclado. Telas verificadas visualmente em 360 px: despesas (e, antes, o painel do gráfico); as demais apenas pela auditoria automatizada.

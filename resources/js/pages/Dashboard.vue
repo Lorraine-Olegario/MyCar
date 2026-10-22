@@ -154,7 +154,7 @@ const isEmptyInstall = computed(() => props.vehicles.length === 0);
             <div v-if="vehicle" class="flex flex-col justify-between gap-6">
                 <div class="flex items-start justify-between gap-4">
                     <div class="min-w-0">
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-400">
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-amber-400">
                             {{ vehicle.status === 'sold' ? 'Veículo vendido' : 'Veículo ativo' }}
                         </p>
                         <h2 id="active-vehicle-title" class="mt-3 text-3xl font-bold tracking-tight text-white">{{ vehicle.full_name }}</h2>

@@ -95,12 +95,12 @@ const costPerKm = (cents) => (cents === null || cents === undefined ? NO_DATA : 
 
 const dueBadge = {
     overdue: 'bg-rose-500/15 text-rose-300',
-    due_soon: 'bg-amber-500/15 text-amber-600',
+    due_soon: 'bg-amber-500/15 text-amber-700',
 };
 const dueLabel = { overdue: 'Atrasado', due_soon: 'Próximo' };
 const statusLabel = { forecast: 'Previsto', paid: 'Pago', canceled: 'Cancelado', superseded: 'Substituído' };
 const statusStyle = {
-    forecast: 'bg-amber-500/15 text-amber-600',
+    forecast: 'bg-amber-500/15 text-amber-700',
     paid: 'bg-emerald-500/15 text-emerald-300',
     canceled: 'bg-slate-800 text-slate-400 line-through',
     superseded: 'bg-slate-800 text-slate-400',
