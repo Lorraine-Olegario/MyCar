@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 import BaseCurrencyInput from '../../components/ui/BaseCurrencyInput.vue';
 import BaseDateInput from '../../components/ui/BaseDateInput.vue';
@@ -44,6 +44,120 @@ const form = useForm({
     photo: null,
     remove_photo: false,
 });
+
+
+// Marca e modelo vêm do catálogo FIPE (carro e moto). Os nomes escolhidos são gravados
+// em `brand`/`model`; os códigos servem só para encadear a consulta. Se o catálogo
+// falhar, ou a categoria não tiver catálogo, o usuário digita manualmente.
+const fipeTypes = { car: 'cars', motorcycle: 'motorcycles' };
+// Sem categoria escolhida ainda, o catálogo de carros já aparece; só "Outro" fica sem catálogo.
+const fipeType = computed(() => (form.category === 'other' ? null : (fipeTypes[form.category] ?? 'cars')));
+const manualEntry = ref(false);
+const useCatalog = computed(() => fipeType.value !== null && !manualEntry.value);
+
+const catalog = reactive({
+    brands: { items: [], loading: false, error: '' },
+    models: { items: [], loading: false, error: '' },
+});
+const brandCode = ref('');
+const modelCode = ref('');
+
+const toOptions = (items) => items.map((item) => ({ value: item.code, label: item.name }));
+
+const loadCatalog = async (step, params) => {
+    const state = catalog[step];
+
+    state.loading = true;
+    state.error = '';
+    state.items = [];
+
+    try {
+        const query = new URLSearchParams(params).toString();
+        const response = await fetch(`/fipe/${step}?${query}`, {
+            headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        });
+        const body = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            throw new Error(body.message ?? 'Não foi possível carregar as opções da FIPE.');
+        }
+
+        state.items = toOptions(body.data);
+    } catch (error) {
+        state.error = error.message || 'Não foi possível carregar as opções da FIPE.';
+    } finally {
+        state.loading = false;
+    }
+
+    return state.items;
+};
+
+const findByName = (items, name) =>
+    items.find((item) => item.label.trim().toLowerCase() === String(name ?? '').trim().toLowerCase());
+
+const loadBrands = async () => {
+    brandCode.value = '';
+    modelCode.value = '';
+    catalog.models.items = [];
+
+    if (!useCatalog.value) {
+        return;
+    }
+
+    const items = await loadCatalog('brands', { type: fipeType.value });
+    const current = findByName(items, form.brand);
+
+    if (current) {
+        brandCode.value = current.value;
+        await loadModels();
+    }
+};
+
+const loadModels = async () => {
+    modelCode.value = '';
+
+    if (brandCode.value === '') {
+        catalog.models.items = [];
+
+        return;
+    }
+
+    const items = await loadCatalog('models', { type: fipeType.value, brand: brandCode.value });
+    const current = findByName(items, form.model);
+
+    if (current) {
+        modelCode.value = current.value;
+    }
+};
+
+const onBrandSelect = (code) => {
+    brandCode.value = code;
+    form.brand = catalog.brands.items.find((item) => item.value === code)?.label ?? '';
+    form.model = '';
+    form.version = '';
+    loadModels();
+};
+
+const onModelSelect = (code) => {
+    modelCode.value = code;
+    form.model = catalog.models.items.find((item) => item.value === code)?.label ?? '';
+};
+
+watch(fipeType, () => {
+    // Trocar a categoria invalida a marca/modelo escolhidos no catálogo anterior.
+    form.brand = '';
+    form.model = '';
+    manualEntry.value = false;
+    loadBrands();
+});
+
+watch(manualEntry, (manual) => {
+    if (!manual) {
+        loadBrands();
+    }
+});
+
+onMounted(loadBrands);
 
 const isSold = computed(() => form.status === 'sold');
 const hasErrors = computed(() => Object.keys(form.errors).length > 0);
@@ -234,29 +348,6 @@ const submit = () => {
                     />
                 </div>
 
-                <BaseInput
-                    v-model="form.brand"
-                    label="Marca"
-                    placeholder="Ex.: Chevrolet"
-                    required
-                    :error="form.errors.brand"
-                />
-
-                <BaseInput
-                    v-model="form.model"
-                    label="Modelo"
-                    placeholder="Ex.: Onix"
-                    required
-                    :error="form.errors.model"
-                />
-
-                <BaseInput
-                    v-model="form.version"
-                    label="Versão"
-                    placeholder="Ex.: 1.0 LT"
-                    :error="form.errors.version"
-                />
-
                 <BaseSelect
                     v-model="form.category"
                     label="Categoria"
@@ -264,6 +355,75 @@ const submit = () => {
                     :options="options.categories"
                     required
                     :error="form.errors.category"
+                />
+
+                <div v-if="fipeType" class="flex items-end">
+                    <button
+                        type="button"
+                        class="text-xs font-medium text-indigo-400 underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+                        @click="manualEntry = !manualEntry"
+                    >
+                        {{ manualEntry ? 'Escolher marca e modelo da lista FIPE' : 'Não encontrou? Informar marca e modelo manualmente' }}
+                    </button>
+                </div>
+
+                <template v-if="useCatalog">
+                    <div>
+                        <BaseSelect
+                            :model-value="brandCode"
+                            label="Marca"
+                            :placeholder="catalog.brands.loading ? 'Carregando…' : 'Selecione a marca'"
+                            :options="catalog.brands.items"
+                            :disabled="catalog.brands.loading"
+                            required
+                            :error="form.errors.brand"
+                            @update:model-value="onBrandSelect"
+                        />
+                        <p v-if="catalog.brands.error" class="mt-1 text-xs text-rose-400" role="alert">
+                            {{ catalog.brands.error }} Você pode informar manualmente.
+                        </p>
+                    </div>
+
+                    <div>
+                        <BaseSelect
+                            :model-value="modelCode"
+                            label="Modelo"
+                            :placeholder="catalog.models.loading ? 'Carregando…' : (brandCode ? 'Selecione o modelo' : 'Selecione a marca primeiro')"
+                            :options="catalog.models.items"
+                            :disabled="brandCode === '' || catalog.models.loading"
+                            required
+                            :error="form.errors.model"
+                            @update:model-value="onModelSelect"
+                        />
+                        <p v-if="catalog.models.error" class="mt-1 text-xs text-rose-400" role="alert">
+                            {{ catalog.models.error }} Você pode informar manualmente.
+                        </p>
+                    </div>
+                </template>
+
+                <template v-else>
+                    <BaseInput
+                        v-model="form.brand"
+                        label="Marca"
+                        placeholder="Ex.: Chevrolet"
+                        required
+                        :error="form.errors.brand"
+                    />
+
+                    <BaseInput
+                        v-model="form.model"
+                        label="Modelo"
+                        placeholder="Ex.: Onix"
+                        required
+                        :error="form.errors.model"
+                    />
+                </template>
+
+                <BaseInput
+                    v-model="form.version"
+                    label="Versão"
+                    placeholder="Ex.: 1.0 LT"
+                    :error="form.errors.version"
                 />
 
                 <BaseInput
