@@ -19,6 +19,11 @@ Route::resource('vehicles', VehicleController::class);
 Route::get('vehicles/{vehicle}/photo', [VehicleController::class, 'photo'])
     ->name('vehicles.photo')
     ->withTrashed();
+Route::middleware('throttle:fipe-catalog')->prefix('fipe')->name('fipe.')->group(function () {
+    Route::get('brands', [VehicleFipeController::class, 'brands'])->name('brands');
+    Route::get('models', [VehicleFipeController::class, 'models'])->name('models');
+    Route::get('years', [VehicleFipeController::class, 'years'])->name('years');
+});
 Route::prefix('vehicles/{vehicle}/fipe')->name('vehicles.fipe.')->group(function () {
     Route::middleware('throttle:fipe-catalog')->group(function () {
         Route::get('brands', [VehicleFipeController::class, 'brands'])->name('brands');
