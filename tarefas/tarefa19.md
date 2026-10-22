@@ -19,3 +19,14 @@
   - Validação: `php artisan test --filter=Maintenance`.
 
 **Execução:** implemente somente este item; um item = uma branch = um commit. Rode as validações indicadas. Esta é a última tarefa da Fase 3; ao terminar, aguarde orientação antes de iniciar a próxima fase.
+
+---
+
+## Realizado
+
+### Item 1 — Histórico de manutenções
+- Branch: `tarefa19/1-historico-manutencoes`
+- Commit: `b4dfe6e`
+- O que foi feito: Migration `maintenances` (`expense_id` único com FK restrict), enum `MaintenanceType`, models/factory, `MaintenanceService` (cria/edita/exclui manutenção e despesa na mesma transação; sobe o odômetro do veículo), `MaintenanceRequest` (apenas categorias de manutenção: óleo, preventiva, corretiva, pneus, freios, elétrica e motor), `MaintenanceDueEvaluator` (ok / vence em breve / vencida por data ou odômetro), `MaintenanceController` e página `Maintenances/Index.vue` (histórico por veículo, formulário, sinalização de vencimento); item "Manutenções" na navegação. A despesa de uma manutenção não pode ser excluída direto pela tela de despesas nem movida para categoria fora de manutenção.
+- Validação: `php artisan test` (176 testes, incluindo `--filter=Maintenance`) e `npm run build` ok.
+- Observações: O aviso de próxima troca vale só para a manutenção mais recente de cada categoria por veículo; as anteriores são histórico. "Em breve" = até 30 dias ou 1.000 km (constantes do evaluator). A tela de despesas lista também as despesas de manutenção (custo aparece uma única vez nos totais). Esta tarefa fecha a Fase 3.
