@@ -30,6 +30,10 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    disabled: {
+        type: Boolean,
+        default: false,
+    },
     id: {
         type: String,
         default: '',
@@ -66,10 +70,13 @@ const describedBy = computed(() => {
             {{ label }}<span v-if="required" class="text-rose-400" aria-hidden="true"> *</span>
         </label>
 
+        <!-- A chave recria o select quando as opções mudam (ex.: carregadas depois), reaplicando o valor. -->
         <select
             :id="selectId"
+            :key="options.length"
             :value="modelValue"
             :required="required"
+            :disabled="disabled"
             :aria-invalid="error ? 'true' : undefined"
             :aria-describedby="describedBy"
             class="mt-1 block w-full rounded-lg border bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"

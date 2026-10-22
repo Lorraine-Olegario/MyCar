@@ -25,7 +25,7 @@ use Illuminate\Support\Arr;
  */
 class VehicleHistory
 {
-    public const TABS = ['expenses', 'fuelings', 'maintenances', 'recurring', 'dues', 'fipe'];
+    public const TABS = ['expenses', 'fuelings', 'maintenances', 'recurring', 'dues'];
 
     public const PER_PAGE = 15;
 
