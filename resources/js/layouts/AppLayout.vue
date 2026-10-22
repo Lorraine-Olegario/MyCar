@@ -42,7 +42,7 @@ watch(currentPath, () => {
 
 <template>
     <div
-        class="min-h-screen overflow-x-hidden bg-slate-950 text-slate-100"
+        class="min-h-screen overflow-x-clip bg-slate-950 text-slate-100"
         @keydown.escape="mobileOpen = false"
     >
         <a

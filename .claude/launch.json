@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "laravel-dev",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "PATH=\"$HOME/.nvm/versions/node/v20.20.0/bin:$PATH\" php artisan serve --port=$PORT"],
+      "port": 8000,
+      "autoPort": true
+    }
+  ]
+}
