@@ -1,6 +1,6 @@
 <script setup>
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import UpcomingDueList from '../../components/recurring/UpcomingDueList.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 import BaseCurrencyInput from '../../components/ui/BaseCurrencyInput.vue';
@@ -16,6 +16,7 @@ import { formatCurrency, formatDate } from '../../utils/format';
 const props = defineProps({
     recurring: { type: Array, required: true },
     occurrences: { type: [Object, Array], default: () => ({}) },
+    editing_id: { type: Number, default: null },
     upcoming: { type: Array, default: () => [] },
     summary: { type: Object, default: () => ({ estimated_cents: 0, paid_cents: 0, forecast_cents: 0 }) },
     options: {
@@ -92,6 +93,15 @@ const openEdit = (item) => {
     form.notes = item.notes ?? '';
     formOpen.value = true;
 };
+
+// Link de edição vindo de outra tela (?edit=ID): abre o formulário existente, sem duplicá-lo.
+onMounted(() => {
+    const item = props.recurring.find((recurring) => recurring.id === props.editing_id);
+
+    if (item) {
+        openEdit(item);
+    }
+});
 
 const submit = () => {
     const options = { preserveScroll: true, onSuccess: () => (formOpen.value = false) };

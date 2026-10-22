@@ -60,6 +60,7 @@ class ExpenseController extends Controller
             'expenses' => $expenses,
             'filters' => $filters,
             'total_cents' => $totalCents,
+            'editing' => $request->filled('edit') ? Expense::query()->find($request->integer('edit')) : null,
             'options' => $this->options(),
         ]);
     }
