@@ -77,3 +77,41 @@ Vue 3, Vite, Tailwind CSS, SQLite e PHPUnit.
   `DB_CONNECTION=sqlite`.
 - `.env` não versionado; `database/*.sqlite*`, `vendor`, `node_modules` e
   `public/build` ignorados. Nenhuma credencial versionada.
+
+## Contextos de domínio (`app/Domain`)
+
+| Contexto | Responsabilidade |
+|---|---|
+| `Vehicles` | Armazenamento privado da foto do veículo. |
+| `Expenses` | Armazenamento privado dos comprovantes. |
+| `Recurring` | `OccurrenceGenerator` (previsões idempotentes, `due_day` ajustado em meses curtos) e `RecurringExpenseService` (criar/editar com sincronização só das previsões futuras, confirmar pagamento em transação, cancelar, resumo do mês). |
+| `Fuel` | `FuelConsumptionCalculator` (método do tanque cheio), `FuelingRecorder` (total automático, odômetro do veículo) e `FuelingOverview`. |
+| `Maintenance` | `MaintenanceService` (manutenção + despesa 1:1 em transação), `MaintenanceDueEvaluator` e `MaintenanceDueQueries`. |
+| `Reporting` | **Fonte única** dos indicadores: `FinancialQueries`, `Period`, `ReportFilters`, `DashboardOverview`, `VehicleFinancialOverview`, `VehicleHistory` e os relatórios (`Reports/*`, `ReportRegistry`, `ReportBuilder`, `ReportCsv`). |
+| `Fipe` | `FipeClient` (HTTP resiliente), `FipeQuoteService` (consulta + histórico atômico), `FipeVehicleMatcher`, `FipeFleetSummary`. |
+| `Demo` | `DemoData`: dados de demonstração identificados e removíveis. |
+
+## Regras transversais
+
+- **Uma só fonte de números:** dashboard, página do veículo, relatórios e CSV consomem `FinancialQueries`. Para o mesmo
+  filtro os valores são idênticos (há testes que comparam as telas).
+- **Escopo por status:** sem veículo escolhido, só entram veículos ativos e não arquivados; vendidos e arquivados são
+  consultas históricas (pedidas por id ou pelas opções) e, no caso dos vendidos, apenas entre aquisição e venda.
+- **Realizado × previsto:** previsões de recorrência vivem em tabelas próprias; só viram despesa ao confirmar o pagamento.
+- **Compra × despesa:** o valor de compra nunca entra em totais de despesa; o TCO soma os dois explicitamente.
+- **FIPE × gasto:** a FIPE só aparece em indicadores próprios, com mês de referência, data da consulta e aviso de desatualização.
+- **Dado ausente é `null`**, nunca zero: custo por km, consumo e resultado da venda aparecem como "dados insuficientes".
+- **Relatórios declarativos:** cada `Report` define colunas tipadas e linhas brutas; a tela formata (`reportFormat.js`) e o
+  CSV (`ReportCsv`) usa a mesma definição — UTF-8 com BOM, `;`, vírgula decimal, datas `dd/mm/aaaa`, neutralização de fórmulas.
+
+## Segurança
+
+- Disco `local` privado (`storage/app/private`, `serve=false`); nomes de arquivo gerados (UUID); validação de MIME real e tamanho.
+- Validação sempre no backend (FormRequests) e atribuição em massa só com dados validados; campos como `receipt_path` e `fipe_*` não são aceitos do cliente.
+- Rate limit nas rotas FIPE; cabeçalhos de segurança; páginas de erro sem detalhes quando `APP_DEBUG=false`.
+- Sem autenticação por decisão de projeto: não expor na internet sem proxy autenticado.
+
+## Banco de dados
+
+SQLite. Valores em centavos (`unsignedBigInteger`), litros e preço por litro em `decimal(8,3)`, datas em `date`.
+Chaves estrangeiras `restrict` onde há histórico a preservar (veículo/categoria com despesas); veículos usam soft delete.

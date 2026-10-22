@@ -18,3 +18,14 @@
   - Validação: testes de feature e `npm run build`.
 
 **Execução:** implemente somente este item; um item = uma branch = um commit. Rode as validações indicadas. Não avance para a próxima tarefa sem orientação.
+
+---
+
+## Realizado
+
+### Item 1 — Interface de despesas recorrentes e vencimentos
+- Branch: `tarefa16/1-interface-recorrentes`
+- Commit: `695964f`
+- O que foi feito: `RecurringExpenseController` (index, store, update, pagar e cancelar ocorrência) e rotas `/recurring`; página `Recurring/Index.vue` com resumo do mês (estimativa mensal, pago e previsto, sempre separados), modelos ativos/inativos com próximo vencimento, formulário, linha do tempo por modelo com status distintos (previsto/pago/cancelado), modal de confirmação de pagamento e cancelamento com confirmação; componente reutilizável `UpcomingDueList.vue` e `RecurringExpenseService::upcoming()` (inclui vencidas) para dashboard e página do veículo; item "Recorrentes" na navegação. Corrigido o default `active=true` do model, que impedia a geração quando o campo não vinha no payload.
+- Validação: `php artisan test` (137 testes) e `npm run build` ok.
+- Observações: Confirmar de novo uma ocorrência já paga devolve mensagem de erro e não cria segunda despesa (testado). Interação visual não exercitada no navegador nesta tarefa.

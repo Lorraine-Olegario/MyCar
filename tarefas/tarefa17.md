@@ -19,3 +19,14 @@
   - Validação: `php artisan test --filter=Fuel`.
 
 **Execução:** implemente somente este item; um item = uma branch = um commit. Rode as validações indicadas. Não avance para a próxima tarefa sem orientação.
+
+---
+
+## Realizado
+
+### Item 1 — Abastecimentos: domínio e cálculos
+- Branch: `tarefa17/1-abastecimentos-dominio`
+- Commit: `d4151b2`
+- O que foi feito: Migration `fuelings` (decimal 8,3, índices por veículo/data e odômetro), model/factory `Fueling`, `FuelConsumptionCalculator` em `app/Domain/Fuel` (km/l só entre cheios consecutivos, parciais somados ao próximo cheio, custo por km, preço médio por litro; `null` com motivo quando faltam dados), `FuelingRecorder` (total automático com ajuste manual, preço derivado do total, `vehicles.odometer` = maior odômetro conhecido), `StoreFuelingRequest`/`UpdateFuelingRequest` (odômetro coerente por veículo, duplicidade exata com confirmação) e `FuelingController` (store/update/destroy).
+- Validação: `php artisan test` (157 testes, incluindo `--filter=Fuel`: 21) ok.
+- Observações: Interpretação da regra de odômetro: comparação cronológica por data (anteriores ≤ odômetro ≤ posteriores); abastecimentos no mesmo dia são aceitos em qualquer ordem. O odômetro do veículo só sobe (excluir um abastecimento não o reduz). Listagem/UI ficam na tarefa 18; `/fuelings` segue com a página provisória.

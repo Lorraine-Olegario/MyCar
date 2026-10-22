@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Fipe\FipeQuoteService;
+use App\Domain\Fipe\FipeVehicleType;
+use App\Domain\Reporting\Period;
+use App\Domain\Reporting\VehicleFinancialOverview;
+use App\Domain\Reporting\VehicleHistory;
 use App\Domain\Vehicles\VehiclePhotoStorage;
 use App\Enums\FuelType;
 use App\Enums\VehicleCategory;
@@ -31,6 +36,17 @@ class VehicleController extends Controller
             'archived' => $request->boolean('archived'),
         ];
 
+        // `view` é o filtro histórico explícito: active, sold ou archived. Vazio = ativos e vendidos.
+        $view = (string) $request->string('view');
+
+        if ($view === 'archived') {
+            $filters['archived'] = true;
+        } elseif (in_array($view, ['active', 'sold'], true)) {
+            $filters['status'] = $view;
+        }
+
+        $filters['view'] = $filters['archived'] ? 'archived' : ($filters['status'] !== '' ? $filters['status'] : '');
+
         $vehicles = Vehicle::query()
             ->when($filters['search'] !== '', function ($query) use ($filters) {
                 $search = '%'.$filters['search'].'%';
@@ -53,6 +69,11 @@ class VehicleController extends Controller
         return Inertia::render('Vehicles/Index', [
             'vehicles' => $vehicles,
             'filters' => $filters,
+            'counts' => [
+                'active' => Vehicle::query()->active()->count(),
+                'sold' => Vehicle::query()->sold()->count(),
+                'archived' => Vehicle::query()->archived()->count(),
+            ],
             'options' => $this->options(),
         ]);
     }
@@ -60,12 +81,81 @@ class VehicleController extends Controller
     /**
      * Exibe um veículo.
      */
-    public function show(Vehicle $vehicle): Response
+    public function show(Request $request, Vehicle $vehicle, VehicleFinancialOverview $financial, VehicleHistory $history, FipeQuoteService $fipe): Response
     {
+        // `financial` e `history` são calculados só quando pedidos (cargas parciais ao trocar de aba).
         return Inertia::render('Vehicles/Show', [
             'vehicle' => $vehicle,
+            'financial' => fn () => $financial->build($vehicle, $request->query()),
+            'history' => fn () => $history->build(
+                $vehicle,
+                $request->query(),
+                $this->selectedPeriod($financial->build($vehicle, $request->query())['selection']),
+            ),
+            'fipe' => fn () => $this->fipeProps($vehicle, $fipe),
             'options' => $this->options(),
         ]);
+    }
+
+    /**
+     * Dados da seção FIPE: cotação atual (com aviso de desatualização), histórico e a seleção guardada.
+     *
+     * @return array<string, mixed>
+     */
+    private function fipeProps(Vehicle $vehicle, FipeQuoteService $fipe): array
+    {
+        $stored = $fipe->storedSelection($vehicle);
+        $type = $stored?->type ?? FipeVehicleType::forCategory($vehicle->category);
+
+        return [
+            'snapshot' => $fipe->snapshot($vehicle),
+            'quotes' => $vehicle->fipeQuotes()->limit(60)->get()->map(fn ($quote) => [
+                'id' => $quote->id,
+                'value_cents' => $quote->value_cents,
+                'reference_month' => $quote->reference_month,
+                'consulted_at' => $quote->consulted_at->toIso8601String(),
+                'brand' => $quote->brand,
+                'model' => $quote->model,
+                'model_year' => $quote->model_year,
+                'fipe_code' => $quote->fipe_code,
+            ])->values()->all(),
+            'variation' => $this->fipeVariation($vehicle),
+            'selection' => $stored ? ['type' => $stored->type->value, 'brand_id' => $stored->brandId, 'model_id' => $stored->modelId, 'year_id' => $stored->yearId] : null,
+            'vehicle_type' => $type?->value,
+            'needs_type' => $type === null,
+            'types' => array_map(fn (FipeVehicleType $case) => ['value' => $case->value, 'label' => $case->label()], FipeVehicleType::cases()),
+        ];
+    }
+
+    /**
+     * Variação entre as duas últimas cotações (nunca soma ou compara com gastos).
+     *
+     * @return array{previous_value_cents: int, change_cents: int, change_percent: ?float, previous_reference_month: string}|null
+     */
+    private function fipeVariation(Vehicle $vehicle): ?array
+    {
+        [$latest, $previous] = [...$vehicle->fipeQuotes()->limit(2)->get()->all(), null, null];
+
+        if ($latest === null || $previous === null) {
+            return null;
+        }
+
+        return [
+            'previous_value_cents' => $previous->value_cents,
+            'previous_reference_month' => $previous->reference_month,
+            'change_cents' => $latest->value_cents - $previous->value_cents,
+            'change_percent' => $previous->value_cents > 0 ? round(($latest->value_cents - $previous->value_cents) / $previous->value_cents * 100, 1) : null,
+        ];
+    }
+
+    /**
+     * @param  array{year: int, month: ?int}  $selection
+     */
+    private function selectedPeriod(array $selection): Period
+    {
+        return $selection['month'] !== null
+            ? Period::ofMonth($selection['year'], $selection['month'])
+            : Period::ofYear($selection['year']);
     }
 
     /**

@@ -2,35 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\VehicleStatus;
-use App\Models\Vehicle;
-use Illuminate\Support\Carbon;
+use App\Domain\Reporting\DashboardOverview;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
     /**
-     * Visão geral: veículo ativo mais recente e atalhos.
+     * Visão geral: veículo em destaque, indicadores, gráficos e vencimentos, com filtros
+     * de veículo e período refletidos na URL.
      */
-    public function __invoke(): Response
+    public function __invoke(Request $request, DashboardOverview $overview): Response
     {
-        $vehicle = Vehicle::query()
-            ->where('status', VehicleStatus::Active)
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
-            ->first();
-
-        return Inertia::render('Dashboard', [
-            'vehicle' => $vehicle,
-            'fuelLabel' => $vehicle?->fuel?->label(),
-            'monthLabel' => mb_strtoupper(Carbon::now()->translatedFormat('F \d\e Y')),
-            'indicators' => [
-                'total_spent_cents' => null,
-                'cost_per_km_cents' => null,
-                'average_consumption' => null,
-                'next_maintenance' => null,
-            ],
-        ]);
+        return Inertia::render('Dashboard', $overview->build($request->query()));
     }
 }

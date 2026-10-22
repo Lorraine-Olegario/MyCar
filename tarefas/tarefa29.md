@@ -18,3 +18,14 @@
   - Validação: `php artisan migrate:fresh` e `php artisan test --filter=FipeQuote`.
 
 **Execução:** implemente somente este item; um item = uma branch = um commit. Rode as validações indicadas. Não avance para a próxima tarefa sem orientação.
+
+---
+
+## Realizado
+
+### Item 1 — Persistência da seleção FIPE e do histórico de cotações
+- Branch: `tarefa29/1-persistencia-fipe`
+- Commit: `b3fad26`
+- O que foi feito: Migration que adiciona ao veículo `fipe_brand_id`, `fipe_model_id`, `fipe_year_id`, `fipe_code`, `fipe_value_cents`, `fipe_reference_month`, `fipe_consulted_at` (e `fipe_vehicle_type`) e cria `fipe_quotes` (índice veículo/data, payload JSON, sem unique que impeça histórico). Model `FipeQuote` + factory, relações `Vehicle::fipeQuotes()` (mais recente primeiro) e `Vehicle::latestFipeQuote()` (desempate por id).
+- Validação: `php artisan migrate:fresh` (em SQLite temporário) e `php artisan test` (285 testes, incluindo `--filter=FipeQuote`: 9) ok.
+- Observações: Coluna extra `fipe_vehicle_type` (cars/motorcycles/trucks), necessária para veículos da categoria "outro", em que o usuário escolhe o tipo. Os campos `fipe_*` do veículo não ficam no `fillable`: só o serviço (tarefa 30) os grava. As cotações persistem se o veículo for arquivado.

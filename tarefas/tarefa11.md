@@ -18,3 +18,14 @@
   - Validação: `php artisan test --filter=VehicleHistory`.
 
 **Execução:** implemente somente este item; um item = uma branch = um commit. Rode as validações indicadas. Esta é a última tarefa da Fase 2; ao terminar, aguarde orientação antes de iniciar a próxima fase.
+
+---
+
+## Realizado
+
+### Item 1 — Consulta histórica de veículos vendidos e arquivados
+- Branch: `tarefa11/1-historico-vendidos-arquivados`
+- Commit: `a4bb37e`
+- O que foi feito: Filtro `view` (ativos e vendidos, ativos, vendidos, arquivados) com contadores e badges na listagem (VehicleController, Vehicles/Index.vue); restauração com ConfirmDialog; aviso de venda e período de propriedade (`ownership_label` no model) na listagem e no detalhe; testes em VehicleHistoryTest.
+- Validação: `php artisan test` (77 testes, incluindo `--filter=VehicleHistory`), `npm test` (20) e `npm run build` ok.
+- Observações: Os parâmetros antigos `status` e `archived` continuam aceitos no backend; a UI usa `view`. Arquivados não têm página de detalhe (404 por padrão), por isso a restauração é feita pela listagem.

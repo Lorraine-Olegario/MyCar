@@ -18,3 +18,14 @@
   - Validação: `php artisan test --filter=FipeReporting` e `npm run build`.
 
 **Execução:** implemente somente este item; um item = uma branch = um commit. Rode as validações indicadas. Esta é a última tarefa da Fase 5; ao terminar, aguarde orientação antes de iniciar a próxima fase.
+
+---
+
+## Realizado
+
+### Item 1 — FIPE nos indicadores e relatórios
+- Branch: `tarefa32/1-fipe-indicadores-relatorios`
+- Commit: `b238dd8`
+- O que foi feito: `FipeFleetSummary`: valor FIPE da frota considerando só veículos ativos e cotações atuais (cotações com mais de 35 dias são contadas como desatualizadas e ficam fora da soma; sem consulta também é contado). Dashboard: card de FIPE com "X de Y com cotação atual · N desatualizados · M sem consulta" e total separado dos gastos. Página do veículo: variação em R$ e % em relação à consulta anterior. Relatório 8 (`FipeEvolutionReport`): consultas reais por veículo, variação (calculada sobre a consulta anterior real, mesmo fora do período), aviso de lacunas entre meses de referência, gráfico de linhas e exportação CSV.
+- Validação: `php artisan test` (320 testes, incluindo `--filter=FipeReporting`: 12) e `npm run build` ok.
+- Observações: A soma da frota usa só cotações atuais (limite configurável `FIPE_STALE_DAYS`). O filtro de veículo do dashboard aplica ao card de FIPE. FIPE não aparece em nenhuma coluna ou total de despesas, TCO ou resultado de venda (testado). Esta tarefa fecha a Fase 5.

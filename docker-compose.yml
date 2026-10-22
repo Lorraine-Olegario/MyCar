@@ -4,8 +4,8 @@ services:
     ports:
       - "8000:8000"
     environment:
-      APP_ENV: local
-      APP_DEBUG: "true"
+      APP_ENV: production
+      APP_DEBUG: "false"
       APP_URL: http://localhost:8000
       DB_CONNECTION: sqlite
       DB_DATABASE: /data/database.sqlite

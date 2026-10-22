@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Vehicle extends Model
@@ -52,6 +54,7 @@ class Vehicle extends Model
         'archived',
         'photo_url',
         'sale_result_cents',
+        'ownership_label',
     ];
 
     /**
@@ -81,7 +84,29 @@ class Vehicle extends Model
             'acquisition_date' => 'date',
             'sale_date' => 'date',
             'tracking_start_date' => 'date',
+            'fipe_value_cents' => 'integer',
+            'fipe_consulted_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Histórico de cotações FIPE (mais recente primeiro).
+     *
+     * @return HasMany<FipeQuote, $this>
+     */
+    public function fipeQuotes(): HasMany
+    {
+        return $this->hasMany(FipeQuote::class)->orderByDesc('consulted_at')->orderByDesc('id');
+    }
+
+    /**
+     * Cotação mais recente persistida; os campos `fipe_*` do veículo sempre refletem esta.
+     *
+     * @return HasOne<FipeQuote, $this>
+     */
+    public function latestFipeQuote(): HasOne
+    {
+        return $this->hasOne(FipeQuote::class)->latestOfMany(['consulted_at', 'id']);
     }
 
     /**
@@ -164,6 +189,38 @@ class Vehicle extends Model
             get: fn (): ?int => $this->purchase_price_cents === null || $this->sale_price_cents === null
                 ? null
                 : $this->sale_price_cents - $this->purchase_price_cents,
+        );
+    }
+
+    /**
+     * Período de propriedade em texto (ex.: "2 anos e 3 meses"): da aquisição até a
+     * venda ou, para veículos ativos, até hoje. Nulo sem data de aquisição.
+     */
+    protected function ownershipLabel(): Attribute
+    {
+        return Attribute::make(
+            get: function (): ?string {
+                if ($this->acquisition_date === null) {
+                    return null;
+                }
+
+                $end = $this->sale_date ?? now();
+                $months = max(0, (int) $this->acquisition_date->diffInMonths($end));
+
+                if ($months < 1) {
+                    return 'menos de 1 mês';
+                }
+
+                $years = intdiv($months, 12);
+                $rest = $months % 12;
+
+                $parts = array_filter([
+                    $years > 0 ? $years.($years === 1 ? ' ano' : ' anos') : null,
+                    $rest > 0 ? $rest.($rest === 1 ? ' mês' : ' meses') : null,
+                ]);
+
+                return implode(' e ', $parts);
+            },
         );
     }
 
