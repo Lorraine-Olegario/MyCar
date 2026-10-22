@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseCategoryController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -16,7 +17,8 @@ Route::patch('vehicles/{vehicle}/restore', [VehicleController::class, 'restore']
     ->name('vehicles.restore')
     ->withTrashed();
 
-Route::get('/expenses', fn () => Inertia::render('Expenses/Index'))->name('expenses.index');
+Route::resource('expenses', ExpenseController::class)->only(['index', 'store', 'update', 'destroy']);
+Route::get('expenses/{expense}/receipt', [ExpenseController::class, 'receipt'])->name('expenses.receipt');
 Route::get('/fuelings', fn () => Inertia::render('Fuelings/Index'))->name('fuelings.index');
 Route::get('/reports', fn () => Inertia::render('Reports/Index'))->name('reports.index');
 Route::resource('categories', ExpenseCategoryController::class)
