@@ -68,6 +68,11 @@ final class ReportFilters
         return new self($period, $this->vehicleId, $this->categoryId, $this->includeSold, $this->includeArchived);
     }
 
+    public function withScope(bool $includeSold, bool $includeArchived): self
+    {
+        return new self($this->period, $this->vehicleId, $this->categoryId, $includeSold, $includeArchived);
+    }
+
     public function withVehicle(?int $vehicleId): self
     {
         return new self($this->period, $vehicleId, $this->categoryId, $this->includeSold, $this->includeArchived);

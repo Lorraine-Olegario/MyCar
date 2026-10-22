@@ -15,6 +15,7 @@ describe('reportFormat', () => {
         expect(formatCell('number', 1234)).toBe('1.234');
         expect(formatCell('decimal2', 12.5)).toBe('12,50');
         expect(formatCell('decimal3', 40)).toBe('40,000');
+        expect(plain(formatCell('price', 5.899))).toBe('R$ 5,899');
         expect(formatCell('percent', 33.333)).toBe('33,3%');
         expect(plain(formatCell('km', 52000))).toBe('52.000 km');
         expect(plain(formatCell('currency_decimal', 18.4))).toBe('R$ 0,18');

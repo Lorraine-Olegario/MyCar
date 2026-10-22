@@ -68,6 +68,14 @@ abstract class Report
     }
 
     /**
+     * Permite ao relatório ajustar o escopo (ex.: TCO sempre inclui vendidos).
+     */
+    public function adjustFilters(ReportFilters $filters): ReportFilters
+    {
+        return $filters;
+    }
+
+    /**
      * Período inicial quando a URL não informa nenhum.
      */
     public function defaultPeriod(): string
