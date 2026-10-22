@@ -19,3 +19,14 @@
   - Validação: `php artisan test --filter=VehicleShow`.
 
 **Execução:** implemente somente este item; um item = uma branch = um commit. Rode as validações indicadas. Não avance para a próxima tarefa sem orientação.
+
+---
+
+## Realizado
+
+### Item 1 — Página do veículo: visão geral e financeiro
+- Branch: `tarefa23/1-veiculo-visao-financeira`
+- Commit: `53a5ffe`
+- O que foi feito: `VehicleFinancialOverview` (domínio, sobre `FinancialQueries`) e prop `financial` em `VehicleController::show`; componente `VehicleFinancial.vue` na página do veículo com seletor de ano e mês (anos anteriores marcados como "histórico incompleto"), despesas desde a aquisição, TCO, gasto do ano e do mês selecionados, custo médio mensal (total e operacional), custo por km (ou "Dados insuficientes"), resultado da venda, evolução mensal e distribuição por categoria. Cabeçalho ganhou o período de propriedade; aquisição e venda continuam em blocos separados.
+- Validação: `php artisan test` (215 testes, incluindo `--filter=VehicleShow`: 9) e `npm run build` ok.
+- Observações: O ano padrão é o atual (ou o da venda, para vendidos). A compra aparece apenas no TCO e no bloco de aquisição, nunca nas despesas por período/categoria. Resultado financeiro de veículo ativo fica em branco até a venda (a FIPE só entra na Fase 5, separada). As abas de históricos continuam com os textos provisórios até a tarefa 24.
