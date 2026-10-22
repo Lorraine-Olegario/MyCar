@@ -20,6 +20,11 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(ExpenseCategorySeeder::class);
 
+        // Só cria a demonstração com MYCAR_DEMO=true (veja DemoSeeder).
+        if (config('mycar.demo')) {
+            $this->call(DemoSeeder::class);
+        }
+
         User::query()->firstOrCreate(
             ['email' => 'test@example.com'],
             ['name' => 'Test User', 'password' => Hash::make('password')],

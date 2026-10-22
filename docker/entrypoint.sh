@@ -20,4 +20,8 @@ fi
 
 php artisan migrate --force
 php artisan db:seed --class=ExpenseCategorySeeder --force
+# Agendador (gera as ocorrências das despesas recorrentes todo dia); a geração inicial é idempotente.
+php artisan recurring:generate
+php artisan schedule:work > /dev/null 2>&1 &
+
 exec php artisan serve --host=0.0.0.0 --port=8000
