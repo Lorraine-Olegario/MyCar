@@ -19,3 +19,14 @@
   - Validação: `php artisan test --filter=Reporting`.
 
 **Execução:** implemente somente este item; um item = uma branch = um commit. Rode as validações indicadas. Não avance para a próxima tarefa sem orientação.
+
+---
+
+## Realizado
+
+### Item 1 — Serviço único de consultas financeiras
+- Branch: `tarefa20/1-servico-consultas-financeiras`
+- Commit: `e389e84`
+- O que foi feito: `app/Domain/Reporting`: `Period` (intervalo inclusivo, mês, ano, últimos N meses, ilimitado), `ReportFilters` e `FinancialQueries` com totais, série mensal e anual (com meses/anos vazios preenchidos), gastos por categoria e por veículo, previsto vs pago, próximos vencimentos, completude do histórico (`is_complete`, `tracking_start_date`, `has_data`) e `vehicleSummary` (TCO, custo médio mensal, média operacional, custo por km, resultado de venda). Agregações no banco, sem N+1; escopo: sem veículo só ativos não arquivados, vendidos limitados a aquisição→venda.
+- Validação: `php artisan test` (194 testes, incluindo `--filter=Reporting`: 18, com fixtures de 2021 a 2026, ano bissexto, vendido, arquivado e conferência manual de TCO/resultado) ok.
+- Observações: Meses de propriedade = meses completos entre aquisição e venda/hoje, mínimo 1. Despesas com data futura entram no realizado (a regra da Fase 3 aceita datas futuras). As séries são agrupadas no PHP a partir de totais diários do banco, para não depender de funções de data do SQLite. As datas do veículo são gravadas com hora (cast `date`), por isso a consulta usa `date()` nessas colunas.
