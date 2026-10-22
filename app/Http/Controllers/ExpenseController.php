@@ -50,7 +50,7 @@ class ExpenseController extends Controller
         $totalCents = (int) (clone $query)->sum('amount_cents');
 
         $expenses = $query
-            ->with(['category:id,name,color', 'vehicle:id,name,brand,model,version,deleted_at'])
+            ->with(['category:id,name,color', 'vehicle:id,name,brand,model,version,tracking_start_date,deleted_at'])
             ->orderByDesc('occurred_on')
             ->orderByDesc('id')
             ->paginate(20)
@@ -70,8 +70,12 @@ class ExpenseController extends Controller
     private function options(): array
     {
         return [
-            'vehicles' => Vehicle::query()->orderBy('name')->get(['id', 'name', 'brand', 'model', 'version'])
-                ->map(fn (Vehicle $vehicle) => ['value' => $vehicle->id, 'label' => $vehicle->full_name])
+            'vehicles' => Vehicle::query()->orderBy('name')->get(['id', 'name', 'brand', 'model', 'version', 'tracking_start_date'])
+                ->map(fn (Vehicle $vehicle) => [
+                    'value' => $vehicle->id,
+                    'label' => $vehicle->full_name,
+                    'tracking_start_date' => $vehicle->tracking_start_date?->toDateString(),
+                ])
                 ->values(),
             'categories' => ExpenseCategory::query()->ordered()->get(['id', 'name', 'color', 'active'])
                 ->map(fn (ExpenseCategory $category) => [
@@ -131,9 +135,13 @@ class ExpenseController extends Controller
     /**
      * Serve o comprovante a partir do disco privado.
      */
-    public function receipt(Expense $expense, ExpenseReceiptStorage $receipts): StreamedResponse
+    public function receipt(Request $request, Expense $expense, ExpenseReceiptStorage $receipts): StreamedResponse
     {
         abort_unless($receipts->exists($expense), 404);
+
+        if ($request->boolean('download')) {
+            return Storage::disk(ExpenseReceiptStorage::DISK)->download($expense->receipt_path);
+        }
 
         return Storage::disk(ExpenseReceiptStorage::DISK)->response($expense->receipt_path);
     }
