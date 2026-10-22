@@ -308,4 +308,16 @@ class ReportsAdvancedTest extends TestCase
             ->has('rows', 1)
             ->where('rows.0.vehicle', 'A'));
     }
+
+    public function test_applied_filters_only_list_the_filters_the_report_supports(): void
+    {
+        $this->get('/reports/sale-result')->assertInertia(fn (Assert $page) => $page
+            ->where('applied', fn ($applied) => collect($applied)->pluck('label')->all() === ['Veículo']));
+
+        $this->get('/reports/fuel-history')->assertInertia(fn (Assert $page) => $page
+            ->where('applied', fn ($applied) => collect($applied)->pluck('label')->all() === ['Período', 'Veículo']));
+
+        $this->get('/reports/by-category')->assertInertia(fn (Assert $page) => $page
+            ->where('applied', fn ($applied) => collect($applied)->pluck('label')->all() === ['Período', 'Veículo', 'Categoria']));
+    }
 }

@@ -32,14 +32,14 @@ class ReportBuilder
             'rows' => $rows,
             'totals' => $report->totals($filters, $rows),
             'chart' => $report->chart($filters, $rows),
-            'applied' => $this->applied($filters),
+            'applied' => $this->applied($filters, $report->supports()['period'], $report->supports()['category']),
         ];
     }
 
     /**
      * @return list<array{label: string, value: string}>
      */
-    public function applied(ReportFilters $filters): array
+    public function applied(ReportFilters $filters, bool $withPeriod = true, bool $withCategory = true): array
     {
         $period = $filters->period->unbounded
             ? 'Todo o histórico'
@@ -50,9 +50,9 @@ class ReportBuilder
             : ($filters->includeSold ? 'Ativos e vendidos' : 'Veículos ativos');
 
         return [
-            ['label' => 'Período', 'value' => $period],
+            ...($withPeriod ? [['label' => 'Período', 'value' => $period]] : []),
             ['label' => 'Veículo', 'value' => $vehicle.($filters->includeArchived && $filters->vehicleId === null ? ' (com arquivados)' : '')],
-            ['label' => 'Categoria', 'value' => $filters->categoryId !== null ? (ExpenseCategory::query()->find($filters->categoryId)?->name ?? 'Categoria não encontrada') : 'Todas'],
+            ...($withCategory ? [['label' => 'Categoria', 'value' => $filters->categoryId !== null ? (ExpenseCategory::query()->find($filters->categoryId)?->name ?? 'Categoria não encontrada') : 'Todas']] : []),
         ];
     }
 }
