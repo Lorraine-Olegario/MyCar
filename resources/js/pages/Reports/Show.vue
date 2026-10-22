@@ -5,6 +5,7 @@ import BarChart from '../../components/reporting/BarChart.vue';
 import CategoryFilter from '../../components/reporting/CategoryFilter.vue';
 import DataCompletenessNotice from '../../components/reporting/DataCompletenessNotice.vue';
 import DonutChart from '../../components/reporting/DonutChart.vue';
+import LineTrendChart from '../../components/reporting/LineTrendChart.vue';
 import PeriodFilter from '../../components/reporting/PeriodFilter.vue';
 import VehicleFilter from '../../components/reporting/VehicleFilter.vue';
 import BasePagination from '../../components/ui/BasePagination.vue';
@@ -126,7 +127,8 @@ const align = (column) => (isNumericType(column.type) ? 'text-right font-mono' :
         <DataCompletenessNotice :completeness="completeness" />
 
         <template v-if="chartData">
-            <DonutChart v-if="chart.type === 'donut'" :title="report.title" :labels="chartData.labels" :values="chartData.values" :loading="loading" />
+            <LineTrendChart v-if="chart.type === 'line'" :title="report.title" :labels="chartData.labels" :series="chartData.series" :loading="loading" />
+            <DonutChart v-else-if="chart.type === 'donut'" :title="report.title" :labels="chartData.labels" :values="chartData.values" :loading="loading" />
             <BarChart v-else :title="report.title" :labels="chartData.labels" :series="chartData.series" :row-header="columns[0].label" :loading="loading" />
         </template>
 

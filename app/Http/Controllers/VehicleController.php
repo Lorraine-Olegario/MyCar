@@ -119,10 +119,32 @@ class VehicleController extends Controller
                 'model_year' => $quote->model_year,
                 'fipe_code' => $quote->fipe_code,
             ])->values()->all(),
+            'variation' => $this->fipeVariation($vehicle),
             'selection' => $stored ? ['type' => $stored->type->value, 'brand_id' => $stored->brandId, 'model_id' => $stored->modelId, 'year_id' => $stored->yearId] : null,
             'vehicle_type' => $type?->value,
             'needs_type' => $type === null,
             'types' => array_map(fn (FipeVehicleType $case) => ['value' => $case->value, 'label' => $case->label()], FipeVehicleType::cases()),
+        ];
+    }
+
+    /**
+     * Variação entre as duas últimas cotações (nunca soma ou compara com gastos).
+     *
+     * @return array{previous_value_cents: int, change_cents: int, change_percent: ?float, previous_reference_month: string}|null
+     */
+    private function fipeVariation(Vehicle $vehicle): ?array
+    {
+        [$latest, $previous] = [...$vehicle->fipeQuotes()->limit(2)->get()->all(), null, null];
+
+        if ($latest === null || $previous === null) {
+            return null;
+        }
+
+        return [
+            'previous_value_cents' => $previous->value_cents,
+            'previous_reference_month' => $previous->reference_month,
+            'change_cents' => $latest->value_cents - $previous->value_cents,
+            'change_percent' => $previous->value_cents > 0 ? round(($latest->value_cents - $previous->value_cents) / $previous->value_cents * 100, 1) : null,
         ];
     }
 
