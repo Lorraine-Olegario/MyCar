@@ -50,7 +50,8 @@ const form = useForm({
 // em `brand`/`model`; os códigos servem só para encadear a consulta. Se o catálogo
 // falhar, ou a categoria não tiver catálogo, o usuário digita manualmente.
 const fipeTypes = { car: 'cars', motorcycle: 'motorcycles' };
-const fipeType = computed(() => fipeTypes[form.category] ?? null);
+// Sem categoria escolhida ainda, o catálogo de carros já aparece; só "Outro" fica sem catálogo.
+const fipeType = computed(() => (form.category === 'other' ? null : (fipeTypes[form.category] ?? 'cars')));
 const manualEntry = ref(false);
 const useCatalog = computed(() => fipeType.value !== null && !manualEntry.value);
 
